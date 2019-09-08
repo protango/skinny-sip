@@ -1,14 +1,13 @@
 {
-    "name": "skinny-dip",
-    "version": "1.0.0",
-    "description": "Reveals nutrition information on popular cocktails",
-    "author": "Zachary Murray <zachary.murray@connect.qut.edu.au>",
-    "main": "server.js",
-    "scripts": {
-      "start": "node server.js"
-    },
-    "dependencies": {
-      "express": "^4.17.1"
-    },
-    "licence": "MIT"
+  "name": "skinny-dip",
+  "version": "1.0.0",
+  "description": "Reveals nutrition information on popular cocktails",
+  "author": "Zachary Murray <zachary.murray@connect.qut.edu.au>",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
   }
+}
