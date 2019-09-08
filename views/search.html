@@ -6,7 +6,7 @@
         <link rel="stylesheet" type="text/css" href="/css/site.css">
 
         <!-- Page Specific JS + CSS  -->
-        <link rel="stylesheet" type="text/css" href="/css/index.css">
+        <link rel="stylesheet" type="text/css" href="/css/search.css">
     </head>
     <body>
         <!-- Navbar -->
@@ -26,54 +26,29 @@
                 </div>
             </div>
         </nav>
-    
-        <!-- Masthead -->
-        <header class="masthead text-white text-center">
-            <div class="overlay"></div>
+        <!-- Search Bar -->
+        <form class="searchForm" method="GET" action="/Search">
             <div class="container">
-                <div class="row">
-                    <div class="col-xl-9 mx-auto">
-                        <h1 class="mb-5">Search for a cocktail and see its nutritional information!</h1>
-                    </div>
-                    <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
-                        <form method="GET" action="/Search">
-                            <div class="form-row">
-                                <div class="col-12 col-md-9 mb-2 mb-md-0">
-                                    <input name="term" type="text" class="form-control form-control-lg" placeholder="Enter a cocktail name...">
-                                </div>
-                                <div class="col-12 col-md-3">
-                                    <button type="submit" class="btn btn-block btn-lg btn-primary">Search</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                <div class="row align-items-center h-100">
+                    <div class="col-10 pr-0"><input name="term" type="text" class="form-control form-control-lg" placeholder="Enter a cocktail name..."></input></div>
+                    <div class="col-2"><button type="submit" class="btn btn-block btn-lg btn-primary">Search</button></div>
                 </div>
             </div>
-        </header>
+        </form>
 
         <!-- Body -->
-        <div class="container mb-5">
-            <h3 class="mt-4 mb-3">Random cocktails</h2>
-            <div class="row randomSuggestions text-center">
-                <div class="col-4">
-                    <a id="lnk1">
-                        <div class="placeholder"><i class="fas fa-cocktail"></i></div>
-                        <span>Loading</span>
-                    </a>
+        <div class="container" id="resultContainer">
+            <h1>Search Results</h1>
+            <div class="lds-ring mx-auto d-block my-5"><div></div><div></div><div></div><div></div></div>
+            <a id="resultTemplate" class="result" href="#" style="display: none">
+                <img />
+                <div>
+                    <h4></h4>
+                    <p><i></i></p>
+                    <div class="mt-3">
+                    </div>
                 </div>
-                <div class="col-4">
-                    <a id="lnk2">
-                        <div class="placeholder"><i class="fas fa-cocktail"></i></div>
-                        <span>Loading</span>
-                    </a>
-                </div>
-                <div class="col-4">
-                    <a id="lnk3">
-                        <div class="placeholder"><i class="fas fa-cocktail"></i></div>
-                        <span>Loading</span>
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
         <!-- Footer -->
         <footer class="footer bg-light">
@@ -82,7 +57,7 @@
                     <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
                         <ul class="list-inline mb-2">
                             <li class="list-inline-item">
-                                <a href="/">Search cocktails</a>
+                                <a href="/Search">Search cocktails</a>
                             </li>
                             <li class="list-inline-item">&sdot;</li>
                             <li class="list-inline-item">
@@ -98,6 +73,6 @@
                 </div>
             </div>
         </footer>
-        <script src="/controllers/index.js"></script>
+        <script src="/controllers/search.js"></script>
     </body>
 </html>

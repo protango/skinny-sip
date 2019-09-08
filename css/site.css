@@ -1,3 +1,17 @@
-body{
-    
+@import url("/inc/bootstrap/css/bootstrap.min.css");
+@import url("/inc/font-awesome/css/all.min.css");
+
+/* Fonts */
+@import url('https://fonts.googleapis.com/css?family=Courgette&display=swap');
+
+.navbar-brand {
+    font-family: 'Courgette', cursive;
+    font-size: 20pt;
+}
+.navbar-brand .fas {
+    margin-right: 5px;
+}
+footer.footer {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
 }
