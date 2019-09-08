@@ -1,5 +1,5 @@
 {
-  "name": "skinny-dip",
+  "name": "skinny-sip",
   "version": "1.0.0",
   "description": "Reveals nutrition information on popular cocktails",
   "author": "Zachary Murray <zachary.murray@connect.qut.edu.au>",
@@ -8,6 +8,9 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "bootstrap": "^4.3.1",
+    "express": "^4.17.1",
+    "jquery": "^3.4.1",
+    "popper.js": "^1.15.0"
   }
 }
