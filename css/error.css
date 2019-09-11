@@ -1,0 +1,11 @@
+.container {
+    min-height: calc(100% - 361px);
+}
+
+.success {
+    color: green;
+}
+
+.fail {
+    color: red;
+}

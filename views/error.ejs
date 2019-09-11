@@ -6,7 +6,7 @@
         <link rel="stylesheet" type="text/css" href="/css/site.css">
 
         <!-- Page Specific JS + CSS  -->
-        <link rel="stylesheet" type="text/css" href="/css/search.css">
+        <link rel="stylesheet" type="text/css" href="/css/error.css">
     </head>
     <body>
         <!-- Navbar -->
@@ -38,18 +38,19 @@
 
         <!-- Body -->
         <div class="container" id="resultContainer">
-            <h1>Search Results</h1>
-            <div class="lds-ring mx-auto d-block my-5"><div></div><div></div><div></div><div></div></div>
-            <div style="display: none" id="noResults"><p>Nothing Found :(</p></div>
-            <a id="resultTemplate" class="result" href="#" style="display: none" alt="Cocktail image">
-                <img />
-                <div>
-                    <h4></h4>
-                    <p><i></i></p>
-                    <div class="mt-3">
-                    </div>
-                </div>
-            </a>
+            <h1>Error</h1>
+            <p><%= locals.error || "We're sorry, but your request couldn't be fulfilled, please try again later" %></p>
+            <h5>Service Status:</h5>
+
+            <p class="<%= cocktaildbOnline ? "success" : "fail" %>">
+                <i class="fas fa-<%= cocktaildbOnline ? "check" : "times" %>-circle"></i> 
+                Cocktail DB is <%= cocktaildbOnline ? "online" : "offline" %>
+            </p>
+            <p class="<%= nutritionixOnline ? "success" : "fail" %>">
+                <i class="fas fa-<%= nutritionixOnline ? "check" : "times" %>-circle"></i> 
+                Nutritionix is <%= nutritionixOnline ? "online" : "offline" %>
+            </p>
+            
         </div>
         <!-- Footer -->
         <footer class="footer bg-light">
@@ -74,6 +75,6 @@
                 </div>
             </div>
         </footer>
-        <script src="/controllers/search.js"></script>
+        <script src="/controllers/error.js"></script>
     </body>
 </html>

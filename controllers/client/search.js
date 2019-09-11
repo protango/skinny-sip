@@ -1,5 +1,5 @@
 var urlParams = new URLSearchParams(location.search);
-if (!urlParams.has('term')) window.location.replace("/");
+if (!urlParams.has('term') || urlParams.get("term").length === 0) window.location.replace("/");
 $.get( "/api/Search/"+urlParams.get("term"), (data) => {
     for (var drink of data) {
         var newElem = $("#resultTemplate").clone();
@@ -13,7 +13,9 @@ $.get( "/api/Search/"+urlParams.get("term"), (data) => {
                 $("<span class='badge badge-secondary ml-1'>"+tag+"</span>")
             );
         }
+        newElem.attr("href", "/Drink?id="+drink.id);
         $("#resultContainer").append(newElem);
     }
+    if (!data.length) $("#noResults").show();
     $(".lds-ring").remove();
 });

@@ -10,6 +10,15 @@ router.get('/', (req, res) => {
 router.get('/Search', (req, res) => {
   res.sendFile("views/search.html", { root: __dirname });
 });
+// drink route
+router.get('/Drink', (req, res) => {
+  res.render("drink", {});
+});
+// error route
+router.get('/Error', async (req, res) => {
+  res.render("error", {error: req.query.error, ...await require("./controllers/server/error")()});
+});
+
 
 // api routes
 require("./api/search")(router);
@@ -19,7 +28,7 @@ require("./api/random")(router);
 router.use('/img', express.static(__dirname + '/img/'));
 
 // Expose js controllers
-router.use('/controllers', express.static(__dirname + '/controllers/'));
+router.use('/controllers', express.static(__dirname + '/controllers/client/'));
 
 //Expose css
 router.use('/css', express.static(__dirname + '/css/'));
