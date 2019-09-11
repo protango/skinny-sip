@@ -12,7 +12,8 @@ router.get('/Search', (req, res) => {
 });
 // drink route
 router.get('/Drink', (req, res) => {
-  res.render("drink", {});
+  let scope = require("./controllers/server/drink")(req.query);
+  res.render("drink", scope);
 });
 // error route
 router.get('/Error', async (req, res) => {
