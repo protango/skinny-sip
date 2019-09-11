@@ -58,3 +58,6 @@ footer.footer {
     background: url("/img/cocktail_beach.jpg") no-repeat 50% 32%;
     background-size: cover;
 }
+#resultContainer {
+  min-height: calc(100% - 361px);
+}
