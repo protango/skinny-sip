@@ -11,9 +11,12 @@ router.get('/Search', (req, res) => {
   res.sendFile("views/search.html", { root: __dirname });
 });
 // drink route
-router.get('/Drink', (req, res) => {
-  let scope = require("./controllers/server/drink")(req.query);
-  res.render("drink", scope);
+router.get('/Drink', async (req, res) => {
+  try {
+    res.render("drink", await require("./controllers/server/drink")(req.query));
+  } catch(e) {
+    res.redirect(301, '/Error?error='+e.message);
+  }
 });
 // error route
 router.get('/Error', async (req, res) => {

@@ -1,3 +1,5 @@
+const request = require('request-promise-native');
+
 async function internalNutritionApi(recipe, drinkName) {
     let result = {};
 

@@ -39,7 +39,12 @@
         <!-- Body -->
         <div class="container" id="resultContainer">
             <h1>Error</h1>
-            <p><%= locals.error || "We're sorry, but your request couldn't be fulfilled, please try again later" %></p>
+            <p>
+                We're sorry, but your request couldn't be fulfilled, please try again later
+                <% if (locals.error != null) { %>
+                    <br /><br /><b>Details: </b><br /><%= error %>
+                <% } %>
+            </p>
             <h5>Service Status:</h5>
 
             <p class="<%= cocktaildbOnline ? "success" : "fail" %>">

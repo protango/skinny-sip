@@ -8,7 +8,7 @@ function drinkApi(router) {
 
         if (!body.recipe) return res.send(result);
 
-        res.send(await require("./internalNutritionApi")(body.recipe, body.name));
+        res.send(await require("../api/internal/nutrition")(body.recipe, body.name));
     });
 }
 
