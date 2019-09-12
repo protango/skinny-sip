@@ -17,13 +17,11 @@ async function drinkServerController(query) {
     var recipe = [];
     for (let i = 1; i<=15; i++) {
         let ing = {
-            ingredient: drink["strIngredient"+i].trim(),
-            measure: drink["strMeasure"+i].trim()
+            ingredient: drink["strIngredient"+i] ? drink["strIngredient"+i].trim() : null,
+            measure: drink["strMeasure"+i] ? drink["strMeasure"+i].trim() : null
         };
-        recipe.push({
-            ingredient: drink["strIngredient"+i],
-            measure: drink["strMeasure"+i]
-        });
+        if (ing.ingredient && ing.measure)
+            recipe.push(ing);
     }
 
     result = {
@@ -33,6 +31,7 @@ async function drinkServerController(query) {
         img: drink.strDrinkThumb,
         tags: drink.strTags ? drink.strTags.split(",").map(x=>x.replace(/([a-z])([A-Z])/g, "$1 $2")) : [],
         glass: drink.strGlass,
+        method: drink.strInstructions,
         nutrition: await require("../../api/internal/nutrition")(recipe, drink.strDrink)
     }
 

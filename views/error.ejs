@@ -42,7 +42,7 @@
             <p>
                 We're sorry, but your request couldn't be fulfilled, please try again later
                 <% if (locals.error != null) { %>
-                    <br /><br /><b>Details: </b><br /><%= error %>
+                    <br /><br /><b>Details: </b><br /><%- error.replace("\n", "<br>") %>
                 <% } %>
             </p>
             <h5>Service Status:</h5>

@@ -1,4 +1,5 @@
 const express = require('express');
+const escape = require('escape-html');
 
 const router = express.Router();
 
@@ -15,12 +16,13 @@ router.get('/Drink', async (req, res) => {
   try {
     res.render("drink", await require("./controllers/server/drink")(req.query));
   } catch(e) {
-    res.redirect(301, '/Error?error='+e.message);
+    console.log(e);
+    res.redirect(302, '/Error?error='+e.message);
   }
 });
 // error route
 router.get('/Error', async (req, res) => {
-  res.render("error", {error: req.query.error, ...await require("./controllers/server/error")()});
+  res.render("error", {error: escape(req.query.error), ...await require("./controllers/server/error")()});
 });
 
 

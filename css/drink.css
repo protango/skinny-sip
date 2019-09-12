@@ -1,5 +1,163 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap');
+
 img.mainImg {
     width: 300px;
     height: 300px;
     border-radius: 5px;
+    display: block;
+    margin: 5px auto;
+}
+p.desc {
+    margin-left: 320px;
+}
+
+.ingImg {
+    height: 128px;
+    border-radius: 3px;
+}
+
+.ingredients th:first-child,
+.ingredients td:first-child {
+    width: 130px;
+    text-align: center;
+}
+
+.ingredients td {
+    vertical-align: middle;
+}
+
+.photoCard {
+    background: #f0f0f0;
+    border-radius: 10px;
+    box-shadow: #afafaf 3px 3px 5px 0px;
+    padding: 20px;
+}
+.recipeCard {
+    margin-left: 60px;
+    flex-grow: 1;
+}
+.warningImgs {
+    height: 64px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+.stdDrinks {
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+    background-image: url(/img/standardDrinks.png);
+    background-size: cover;
+    position: relative;
+    margin-right: 10px;
+    float: left;
+}
+.stdDrinks span {
+    position: relative;
+    color: #f0f0f0;
+    font-size: 21px;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+    top: 25px;
+    width: 100%;
+    text-align: center;
+    display: inline-block;
+}
+.pregnantDrinkWarning {
+    height: 45px;
+    float: left;
+    margin-top: 12px;
+}
+
+.nutritionTable {
+    margin: 10px auto;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+    font-family: 'Roboto', sans-serif;
+    width: 310px;
+    border-spacing: 0;
+}
+
+.nutritionTable td {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.nutritionTable .title {
+    font-weight: 700;
+    font-size: 25px;
+    line-height: 25px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.nutritionTable .subtitle {
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 15px;
+    position: relative;
+    top: -2px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.nutritionTable .headerRow td {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.nutritionTable .headerRow td:not(:first-child) {
+    width: 65px;
+    text-align: center;
+    font-size: 13px;
+}
+.nutritionTable .headerRow td:first-child {
+    width: 200px;
+}
+.nutritionTable .appendix {
+    font-size: 13px;
+}
+.nutritionTable .valRow td {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+.nutritionTable .valRow .nName {
+    text-transform: uppercase;
+    font-weight: bold;
+}
+.nutritionTable .valRow.subVal .nName {
+    font-weight: 400;
+}
+.nutritionTable .valRow.subVal .nName::before {
+    content: '- ';
+}
+.nutritionTable .valRow td:not(:first-child) {
+    text-align: right;
+}
+.nutritionTable .microHeaderRow td {
+    text-align: center;
+}
+.nutritionTable .microHeaderRow td {
+    border-top: 1px solid black;
+}
+.nutritionTable .nDI {
+    background: #bde4f9;
+    font-weight: 500;
+}
+
+.nutritionTable .headerRow .blueHl,
+.nutritionTable .microHeaderRow .blueHl {
+    background: #00aced;
+    font-weight: 500;
+    color: white;
+    font-size: 13px;
+}
+
+.nutritionTable tr:last-child td {
+    border-top: 1px solid black;
+}
+
+.nutritionTable .yellowHl td {
+    background: #fff400;
+}
+.nutritionTable .valRow.micro .nName {
+    font-weight: 400;
 }

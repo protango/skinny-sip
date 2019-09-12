@@ -39,7 +39,133 @@
         <!-- Body -->
         <div class="container" id="resultContainer">
             <h1><%= name %></h1>
-            <img  class="mainImg" src="<%= img %>" />
+            <i><%= desc %></i>
+            <% for (var tag of tags) {%><span class='badge badge-secondary ml-1'><%=tag%></span><%}%>
+            <div class="d-flex mt-3">
+                <div class="photoCard">
+                    <img  class="mainImg" src="<%= img %>" />
+
+                    <div class="warningImgs">
+                        <% let alcObj = nutrition.aggregate.full_nutrients.find(x=>x.attr_id===221);
+                           if (alcObj) {%>
+                            <div class="stdDrinks"><span><%=Math.round(alcObj.value / 10 * 10) / 10 %></span></div>
+                        <%}%>
+                        <img src="/img/pregnantDrinkWarning.jpg" class="pregnantDrinkWarning">
+                    </div>
+
+                    <% var n = nutrition.aggregate %>
+                    <% 
+                        var DI = function(value, reference) {
+                            if (!reference) return "-";
+                            var rdi = Math.round(value/reference*100);
+                            if (rdi === 0 && value > 0) return "<1%";
+                            return rdi + "%";
+                        }
+                        var p100 = function(value) {
+                            return Math.round(value / n.serving_weight_grams * 100 * 10) / 10;
+                        }
+                    %>
+                    <% var valRow = function(name, value, reference, unit, extraClass) { %>
+                        <tr class="valRow<%= extraClass ? ' '+extraClass : '' %><%= (reference && value / reference >= 0.5) || name==='Alcohol, ethyl' ? ' yellowHl' : '' %>">
+                            <td class="nName"><%= name %></td>
+                            <td class="nQtyPs"><%= Math.round(value * 10) / 10 %> <%= unit %></td>
+                            <td class="nDI"><%= DI(value, reference) %></td>
+                            <td class="nQty100"><%= p100(value) %> <%= unit %></td>
+                        </tr>
+                    <% } %>
+                    <table class="nutritionTable">
+                        <tr><td colspan="4" class="title">Nutrition Information</td></tr>
+                        <tr><td colspan="4" class="subTitle">(AVERAGE)</td></tr>
+                        <tr>
+                            <td colspan="4" class="servPp">
+                                Servings per package: <span class="servPpVal">1</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="servSz">
+                                Serving Size: <span class="servSzVal"><%= n.serving_weight_grams %>g</span>
+                            </td>
+                        </tr>
+                        <tr class="headerRow">
+                            <td></td>
+                            <td>quantity per serving</td>
+                            <td class="blueHl">% daily intake &#9650; per serving</td>
+                            <td>quantity per 100g</td>
+                        </tr>
+                        <%- valRow("energy", n.nf_energy, 8700, "kJ") %>
+                        <%- valRow("protein", n.nf_protein, 50, "g") %>
+                        <%- valRow("fat, total", n.nf_total_fat, 70, "g") %>
+                        <%- valRow("saturated", n.nf_saturated_fat, 24, "g", "subVal") %>
+                        <%- valRow("CARBOHYDRATE", n.nf_total_carbohydrate, 310, "g") %>
+                        <%- valRow("SUGARS", n.nf_sugars, 90, "g", "subVal") %>
+                        <%- valRow("dietary fibre", n.nf_dietary_fiber, 30, "g") %>
+                        <%- valRow("sodium", n.nf_sodium, 2300, "mg") %>
+                        <%- valRow("potassium", n.nf_potassium, 3300, "mg") %>
+                        <%- valRow("cholestrol", n.nf_cholesterol, 0, "mg") %>
+                        <tr class="microHeaderRow">
+                            <td></td>
+                            <td></td>
+                            <td class="blueHl">% RDI*</td>
+                            <td></td>
+                        </tr>
+                        <% for (let m of nutrition.microNutrients) {%>
+                            <% let fObject = n.full_nutrients.find(x=>x.attr_id===m.id);
+                               if (fObject && Math.round(fObject.value*10)/10 > 0) { %>
+                                <%- valRow(m.name, fObject.value, m.rdi, m.unit, "micro") %>
+                            <%}%>
+                        <%}%>
+                        <tr class="appendix">
+                            <td colspan="4">
+                                &#9650; Percentage daily intakes are based on an average adult diet of 8700kJ.<br>
+                                * Percentage Recommended Dietary Intake (Aust/NZ)
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="recipeCard">
+                    <h3>Ingredients</h3>
+                    <table class="table ingredients">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Amount</th>
+                                <th>Energy (kJ)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <%
+                            function toTitleCase(str) {
+                                return str.replace(
+                                    /\w\S*/g,
+                                    function(txt) {
+                                        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                                    }
+                                );
+                            }
+                        %>
+                        <% for (let ing of nutrition.ingredients) { %>
+                            <tr>
+                                <td><img class="ingImg" src="<%= ing.photo.thumb %>" /></td>
+                                <td><%= toTitleCase(ing.food_name) %></td>
+                                <td>
+                                    <%= ing.serving_qty %> <%= ing.serving_unit %>
+                                    <% if (ing.serving_qty_metric && ing.serving_unit_metric) { %>
+                                        <br />(<%= ing.serving_qty_metric %> <%= ing.serving_unit_metric %>)
+                                    <% } %>
+                                </td>
+                                <td><%= ing.nf_energy %> kJ</td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                    <h3>Method</h3>
+                    <p><%= method %></p>
+                </div>
+            </div>
+            <div class="row mt-5">
+                
+            </div>
         </div>
         <!-- Footer -->
         <footer class="footer bg-light">
