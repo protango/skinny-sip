@@ -9,5 +9,15 @@
     {"ogContains": "everclear", "replacement": "alcohol"},
     {"ogContains": "grand marnier", "replacement": "cointreau"},
     {"ogContains": "Boone Strawberry Hill Wine", "replacement": "white wine"},
-    {"ogContains": "mint", "replacement": "mint leaves"}
+    {"ogContains": "mint", "replacement": "mint leaves"},
+    {"ogContains": "Green Ginger Wine", "replacement": "white wine"},
+    {"ogContains": "frangelico", "replacement": "Liqueur"},
+    {"ogContains": "anisette", "replacement": "Liqueur"},
+    {"ogContains": "Strawberry Schnapps", "replacement": "Schnapps"},
+    {"ogContains": "Anis", "replacement": "Liqueur"},
+    {"ogContains": "bitters", "replacement": "bitters"},
+    {"ogContains": "Maraschino Liqueur", "replacement": "Liqueur"},
+    {"ogContains": "blackberry brandy", "replacement": "apricot brandy"},
+    {"ogContains": "Goldschlager", "replacement": "Schnapps"},
+    {"ogContains": "midori", "replacement": "Liqueur"}
 ]}
