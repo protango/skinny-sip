@@ -136,11 +136,16 @@ function fixUnknownIngredients(recipe) {
 function fixUnknownMeasures(recipe) {
     for (let line of recipe) {
         line.originalMeasure = line.measure;
-        let measure = line.measure.toLowerCase();
-        let ing = line.ingredient.toLowerCase();
+        let measure = line.measure.toLowerCase().trim();
+        let ing = line.ingredient.toLowerCase().trim();
         if (measure === "juice of 1/2" && (ing === "lemon" || ing === "lime")) {
             line.measure = "15 mL";
             line.ingredient = ing + " juice";
+        } else if (measure.endsWith("cl")) {
+            let numberVal = Number(measure.substring(0, measure.length - 2));
+            if (!isNaN(numberVal)) {
+                line.measure = (numberVal * 10) + " mL";
+            }
         }
     }
 }
