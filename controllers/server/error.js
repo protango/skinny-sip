@@ -19,17 +19,14 @@ async function errorServerController() {
 
     try {
         body = await request({
-            method: 'POST',
-            uri: 'https://trackapi.nutritionix.com/v2/natural/nutrients',
-            body: {
-                query: "5g Sugar"
-            },
+            uri: 'https://trackapi.nutritionix.com/v2/search/instant',
+            qs: {query: "vodka" },
             json: true,
             headers: apiKeys.nutritionix
         });
     } catch {}
 
-    if (body && body.foods && body.foods.length > 0) result.nutritionixOnline = true;
+    if (body && body.common && body.common.length > 0) result.nutritionixOnline = true;
 
     return result;
 }

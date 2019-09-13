@@ -149,7 +149,7 @@
                                 <td><img class="ingImg" src="<%= ing.photo.thumb %>" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
                                 <td><%= toTitleCase(ing.food_name) %></td>
                                 <td>
-                                    <%= ing.serving_qty %> <%= ing.serving_unit %>
+                                    <%= Math.round(ing.serving_qty*100)/100 %> <%= ing.serving_unit %>
                                     <% if (ing.serving_qty_metric && ing.serving_unit_metric) { %>
                                         <br />(<%= ing.serving_qty_metric %> <%= ing.serving_unit_metric %>)
                                     <% } %>

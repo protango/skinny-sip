@@ -8,20 +8,9 @@ async function internalNutritionApi(recipe, drinkName) {
     fixUnknownMeasures(recipe); // fix badly formatted measures in cocktail DB
     fixUnknownIngredients(recipe); // re-map known bad ingredients to their known substitute
 
-    // build a recipe string suitable for the NLP processor at nutritionix
-    let nlpRecipe = recipe.map(x=>{ 
-        let result = x.measure;
-        if (x.unit) result+= " " + x.unit;
-        result += " " + x.ingredient;
-        return result;
-    }).join("\n");
-
     // get nutritionix response
-    response = await cachedNutritionix(nlpRecipe);
-    // if there was an error, handle it in a different function
-    if (response.errors && response.errors.length) {
-        handleNutritionixError(response, nlpRecipe, recipe);
-    }
+    response = await cachedNutritionix(recipe);
+
     result.ingredients = response.foods;
     // merge the nutrition data for each ingredient into one aggregate object
     result.aggregate = aggregateNutrition(response.foods, drinkName || "Drink");
@@ -36,9 +25,10 @@ async function internalNutritionApi(recipe, drinkName) {
         let og_ing = recipe[i];
         addMetricMeasure(ing); // add metric measurements
         ing.nf_energy = Math.round(ing.nf_calories * 4.184);
-        if (og_ing && og_ing.originalIngredient) { // re-map ingredient back to it's original name
-            ing.food_name = og_ing.originalIngredient;
-            ing.forceImageLookup = true;
+        if (og_ing) { // re-map ingredient back to it's original name
+            ing.food_name = og_ing.originalIngredient || og_ing.ingredient;
+            if (og_ing.originalIngredient)
+                ing.forceImageLookup = true;
         }
         await fixBrokenImages(ing); // fix broken images
     }
@@ -87,19 +77,25 @@ function fixUnknownMeasures(recipe) {
         let ing = line.ingredient.toLowerCase().trim();
         let matches;
         // handle situation where part of the ingredient name is in the measurement field
-        if (matches = measure.match(/^\s*(\d+|(?:\d+ )?\d+\/\d+|\d+\.\d+)\s+(ml|oz|shots?|fl oz|cups?|cl|bottles?|gal|lb|g)\s+(.+)$/i)) {
+        if (matches = measure.match(/^\s*(\d+|(?:\d+ )?\d+\/\d+|\d+\.\d+)\s+(ml|oz|shots?|fl oz|cups?|cl|bottles?|gal|lb|g|dl)\s+(.+)$/i)) {
             ing = line.ingredient = matches[3] + " " + ing;
             measure = line.measure = matches[1] + " " + matches[2];
         }
-        if (measure === "juice of 1/2" && (ing === "lemon" || ing === "lime")) {
-            line.measure = "15 mL";
+        if (matches = measure.match(/juice of (\d+)\/(\d+)/)) {
+            let qty = Math.round(Number(matches[1]) / Number(matches[2]) * 30);
+            line.measure = qty + " mL";
             line.ingredient = ing + " juice";
         } else if (measure.endsWith(" cl")) {
             let numberVal = Number(measure.substring(0, measure.length - 2));
             if (!isNaN(numberVal)) {
                 line.measure = (numberVal * 10) + " mL";
             }
-        } 
+        } else if (measure.endsWith(" dl")) {
+            let numberVal = Number(measure.substring(0, measure.length - 2));
+            if (!isNaN(numberVal)) {
+                line.measure = (numberVal * 100) + " mL";
+            }
+        }
     }
 }
 
@@ -137,22 +133,4 @@ function aggregateNutrition(indivResults, newName) {
     }
     result.serving_weight_grams = Math.round(result.serving_weight_grams*100) / 100;
     return result;
-}
-
-// Try to handle a nutritionix error
-function handleNutritionixError(response, nlpRecipe, recipe) {
-    console.log(response);
-    let err_code = response.errors[0].err_code;
-    let warning = response.errors[0].warning;
-    if (err_code != 100 && err_code != 101) throw new Error("Unresolvable problem with Nutritionix API: "+response.errors[0].warning);
-    let badLine = response.errors[0].original_text;
-    let badIdx = nlpRecipe.split("\n").indexOf(badLine);
-    if (badIdx < 0) {
-        let matches = warning.match(/line (\d+)\.?$/);
-        if (matches) badIdx = Number(matches[1]);
-    }
-    if (badIdx < 0) throw new Error("Unresolvable problem with Nutritionix API: "+response.errors[0].warning);
-
-    ingredientMap.needsReplacement(recipe[badIdx].ingredient);
-    throw {needsSubstitute: recipe[badIdx].ingredient}; // will redirect to the find substitute page
 }
