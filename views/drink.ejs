@@ -20,7 +20,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a class="nav-link" href="/">Search</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Drink">Build</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Random">Random</a></li>
                         <li class="nav-item"><a class="nav-link" href="/About">About</a></li>
                     </ul>
                 </div>
@@ -30,7 +30,7 @@
         <form class="searchForm" method="GET" action="/Search">
             <div class="container">
                 <div class="row align-items-center h-100">
-                    <div class="col-10 pr-0"><input name="term" type="text" class="form-control form-control-lg" placeholder="Enter a cocktail name..."></input></div>
+                    <div class="col-10 pr-0"><input name="term" type="text" class="form-control form-control-lg" placeholder="Enter a cocktail name..." /></div>
                     <div class="col-2"><button type="submit" class="btn btn-block btn-lg btn-primary">Search</button></div>
                 </div>
             </div>
@@ -78,7 +78,7 @@
                         <tr><td colspan="4" class="subTitle">(AVERAGE)</td></tr>
                         <tr>
                             <td colspan="4" class="servPp">
-                                Servings per package: <span class="servPpVal">1</span>
+                                Servings per package: <span class="servPpVal"><%= n.serving_qty %></span>
                             </td>
                         </tr>
                         <tr>
@@ -146,7 +146,7 @@
                         %>
                         <% for (let ing of nutrition.ingredients) { %>
                             <tr>
-                                <td><img class="ingImg" src="<%= ing.photo.thumb %>" /></td>
+                                <td><img class="ingImg" src="<%= ing.photo.thumb %>" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
                                 <td><%= toTitleCase(ing.food_name) %></td>
                                 <td>
                                     <%= ing.serving_qty %> <%= ing.serving_unit %>
@@ -178,7 +178,7 @@
                             </li>
                             <li class="list-inline-item">&sdot;</li>
                             <li class="list-inline-item">
-                                <a href="/Drink">Build a cocktail</a>
+                                <a href="/Random">Random cocktail</a>
                             </li>
                             <li class="list-inline-item">&sdot;</li>
                             <li class="list-inline-item">

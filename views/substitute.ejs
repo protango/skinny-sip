@@ -6,8 +6,8 @@
         <link rel="stylesheet" type="text/css" href="/css/site.css">
 
         <!-- Page Specific JS + CSS  -->
-        <link rel="stylesheet" type="text/css" href="/css/error.css">
-        <title>Skinny Sip - Error</title>
+        <link rel="stylesheet" type="text/css" href="/css/substitute.css">
+        <title>Substitute Ingredient</title>
     </head>
     <body>
         <!-- Navbar -->
@@ -39,23 +39,46 @@
 
         <!-- Body -->
         <div class="container" id="resultContainer">
-            <h1>Error</h1>
+            <h1>Unknown Ingredient</h1>
             <p>
-                We're sorry, but your request couldn't be fulfilled, please try again later
-                <% if (locals.error != null) { %>
-                    <br /><br /><b>Details: </b><br /><%- error.replace("\n", "<br>") %>
-                <% } %>
+                We couldn't find any nutrition info for the ingredient: "<%= ingredient %>"<br>
+                Please enter a similar/generic ingredient below, and we'll use the nutrition information from that instead.
             </p>
-            <h5>Service Status:</h5>
-
-            <p class="<%= cocktaildbOnline ? "success" : "fail" %>">
-                <i class="fas fa-<%= cocktaildbOnline ? "check" : "times" %>-circle"></i> 
-                Cocktail DB is <%= cocktaildbOnline ? "online" : "offline" %>
-            </p>
-            <p class="<%= nutritionixOnline ? "success" : "fail" %>">
-                <i class="fas fa-<%= nutritionixOnline ? "check" : "times" %>-circle"></i> 
-                Nutritionix is <%= nutritionixOnline ? "online" : "offline" %>
-            </p>
+            <form class="mt-5" id="substituteForm" method="POST", action="/api/Substitute">
+                <input type="hidden" name="drinkId" value="<%= drinkId %>" />
+                <input type="hidden" name="ingredient" value="<%= ingredient %>" />
+                <div class="row">
+                    <div class="col-5 text-center">
+                        <h5>Original:</h5>
+                        <table>
+                            <tr>
+                                <td>
+                                    <img src="https://www.thecocktaildb.com/images/ingredients/<%= ingredient %>-Small.png" onerror="this.onerror=null; this.src='/img/noImage.png'" />
+                                </td>
+                                <td class="align-middle">
+                                    <%= ingredient %>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-2 text-center"><i class="fas fa-arrow-right"></i></div>
+                    <div class="col-5 text-center">
+                        <h5>Nutritional Substitute:</h5>
+                        <div id="grpInput" class="input-group p-relative">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input name="substitute" id="substitute" type="text" class="form-control" placeholder="Search for ingredient">
+                            <div id="autofill" class="dropdown-menu p-absolute" style="display: none; width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <input id="submitSub" type="submit" class="btn btn-primary mt-3" /><br>
+                    <span id="ddWarn">You must select an option from the dropdown to submit this form</span> 
+                </div>
+            </form>
             
         </div>
         <!-- Footer -->
@@ -81,5 +104,6 @@
                 </div>
             </div>
         </footer>
+        <script src="/controllers/substitute.js"></script>
     </body>
 </html>

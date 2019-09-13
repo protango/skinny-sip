@@ -1,4 +1,6 @@
 const request = require('request-promise-native');
+const fs = require('fs');
+const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 
 async function errorServerController() {
     result = {
@@ -8,17 +10,13 @@ async function errorServerController() {
     
     try {
         var body = await request({
-            uri: 'https://www.thecocktaildb.com/api/json/v1/1/search.php',
+            uri: 'https://www.thecocktaildb.com/api/json/v1/'+apiKeys.cocktailDB+'/search.php',
             qs: {s: "margarita" },
             json: true
         });
     } catch {}
     if (body && body.drinks && body.drinks.length > 0) result.cocktaildbOnline = true;
 
-    let headers = {
-        "x-app-id": "a73a6a46",
-        "x-app-key": "468dbab1e189d87d17155c5afa1ad6e3"
-    };
     try {
         body = await request({
             method: 'POST',
@@ -27,7 +25,7 @@ async function errorServerController() {
                 query: "5g Sugar"
             },
             json: true,
-            headers: headers
+            headers: apiKeys.nutritionix
         });
     } catch {}
 

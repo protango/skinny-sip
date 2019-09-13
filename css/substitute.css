@@ -1,0 +1,26 @@
+#substituteForm i.fas.fa-arrow-right {
+    margin-top: 51px;
+    font-size: 30px;
+}
+
+#substituteForm img {
+    height: 64px;
+}
+
+#substituteForm .input-group {
+    margin-top: 20px;
+}
+
+#substituteForm table {
+    margin: 0px auto;
+}
+
+body {
+    overflow: hidden;
+}
+
+#ddWarn {
+    color: red;
+    font-style: italic;
+    display: none;
+}

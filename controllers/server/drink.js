@@ -1,11 +1,13 @@
 const request = require('request-promise-native');
+const fs = require('fs');
+const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 
 async function drinkServerController(query) {
     let id = Number(query.id);
     if (isNaN(Number(id))) throw new Error("Invalid Id");
 
     var drink = await request({
-        uri: 'https://www.thecocktaildb.com/api/json/v1/1/lookup.php',
+        uri: 'https://www.thecocktaildb.com/api/json/v1/'+apiKeys.cocktailDB+'/lookup.php',
         qs: {i: id },
         json: true
     });
@@ -20,8 +22,10 @@ async function drinkServerController(query) {
             ingredient: drink["strIngredient"+i] ? drink["strIngredient"+i].trim() : null,
             measure: drink["strMeasure"+i] ? drink["strMeasure"+i].trim() : null
         };
-        if (ing.ingredient && ing.measure)
+        if (ing.ingredient) {
+            if (!ing.measure) ing.measure = "1 Serving";
             recipe.push(ing);
+        }
     }
 
     result = {
