@@ -23,7 +23,7 @@ async function cachedNutritionix(recipe) {
         if (unit === "cups" || unit === "shots") unit = unit.substring(0, unit.length - 1);
         if (unit === "fl oz") {unit = "oz"; qty /= 1.040843;}
         if (unit === "shot") {unit = "oz"; qty *= 1.5;}
-        
+
         if (qty && unit) cacheKey = JSON.stringify({u: unit, i: line.ingredient.toLowerCase()});
         else cacheKey = JSON.stringify({m: line.measure, i: line.ingredient.toLowerCase()});
 
@@ -42,8 +42,9 @@ async function cachedNutritionix(recipe) {
     if (unknownLines.length) {
         let nlpRecipe = unknownLines.map(x=>x.measure+" "+x.ingredient).join("\n");
         // get nutritionix response
+        let response = {};
         try {
-            var response = await request({
+            response = await request({
                 method: 'POST',
                 uri: 'https://trackapi.nutritionix.com/v2/natural/nutrients',
                 body: {
