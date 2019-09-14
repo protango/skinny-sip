@@ -32,6 +32,7 @@ async function internalNutritionApi(recipe, drinkName) {
         ing.nf_energy = Math.round(ing.nf_calories * 4.184);
         if (og_ing) { // re-map ingredient back to it's original name
             ing.food_name = og_ing.originalIngredient || og_ing.ingredient;
+            if (og_ing.edited) ing.edited = og_ing.edited;
             if (og_ing.originalIngredient)
                 ing.forceImageLookup = true;
         }
@@ -113,12 +114,13 @@ function aggregateNutrition(indivResults, newName) {
     if (!indivResults || !indivResults.length) return {};
     let result = Object.assign({}, indivResults[0]);
     result.food_name = newName;
+    result.serving_weight_grams *= result.serving_qty;
     result.serving_qty = 1;
     result.serving_unit = "serving";
     let nfKeys = Object.keys(result).filter(x=>x.startsWith("nf_")); // get a list of keys that correspond to nutrition values
     for (let i = 1; i<indivResults.length; i++) {
         let foodItem = indivResults[i];
-        result.serving_weight_grams += foodItem.serving_weight_grams;
+        result.serving_weight_grams += foodItem.serving_weight_grams * foodItem.serving_qty;
         for (let key of nfKeys)
             result[key] += foodItem[key];
         for (let microN of foodItem.full_nutrients) { // process micronutrients

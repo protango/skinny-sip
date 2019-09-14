@@ -27,9 +27,18 @@ async function cachedNutritionix(recipe) {
             qty = Number(matches[1]);
             unit = matches[2];
         } 
-        if (unit === "cups" || unit === "shots") unit = unit.substring(0, unit.length - 1);
-        if (unit === "fl oz") {unit = "oz"; qty /= 1.040843;}
-        if (unit === "shot") {unit = "oz"; qty *= 1.5;}
+        if (qty && unit) { // translate common things to oz
+            let unitTranslation = null;
+            if (unit === "cups" || unit === "shots") unit = unit.substring(0, unit.length - 1);
+            if (unit === "fl oz") unitTranslation = {og_unit: unit, unit: "oz", scaleFactor: 1/1.040843};
+            else if (unit === "shot") unitTranslation = {og_unit: unit, unit: "oz", scaleFactor: 1.5};
+            else if (unit === "ml" || unit === "mL") unitTranslation = {og_unit: unit, unit: "oz", scaleFactor: 0.033814};
+            if (unitTranslation) {
+                line.unitTranslation = unitTranslation;
+                qty *= unitTranslation.scaleFactor;
+                unit = unitTranslation.unit;
+            }
+        }
 
         if (qty && unit) cacheKey = JSON.stringify({u: unit, i: line.ingredient.toLowerCase()});
         else cacheKey = JSON.stringify({m: line.measure, i: line.ingredient.toLowerCase()});
@@ -75,7 +84,7 @@ async function cachedNutritionix(recipe) {
                 simResponse.foods.splice(unknownLines[i].lineNo, 0, response.foods[i]);
                 // write to memory cache if there's room
                 if (cacheKeys.length < maxCacheEntries);
-                    cache[unknownLines[i].cacheKey] = response.foods[i];
+                    cache[unknownLines[i].cacheKey] = cloneDeep(response.foods[i]);
             }
             // save cache to disk if there's room
             if (cacheKeys.length < maxCacheEntries);
@@ -85,6 +94,14 @@ async function cachedNutritionix(recipe) {
         }
     } else {
         console.log("Just served a 100% cached request!")
+    }
+
+    // untranslate values
+    for (let i = 0; i<simResponse.foods.length; i++) {
+        if (!recipe[i].unitTranslation) continue;
+        simResponse.foods[i].serving_unit = recipe[i].unitTranslation.og_unit;
+        simResponse.foods[i].serving_qty /= recipe[i].unitTranslation.scaleFactor;
+        simResponse.foods[i].serving_weight_grams *= recipe[i].unitTranslation.scaleFactor;
     }
     return simResponse;
 }
@@ -123,6 +140,8 @@ function handleNutritionixError(response, recipe) {
     if (matches) badIdx = Number(matches[1]) - 1;
     else throw new Error("Unresolvable problem with Nutritionix API: "+response.errors[0].warning);
 
+    if (recipe[badIdx].edited) throw new Error("Invalid edit to ingredient");
+    
     ingredientMap.needsReplacement(recipe[badIdx].ingredient);
     throw {needsSubstitute: recipe[badIdx].ingredient}; // will redirect to the find substitute page
 }

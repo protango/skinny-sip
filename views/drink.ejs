@@ -124,41 +124,56 @@
                 </div>
                 <div class="recipeCard">
                     <h3>Ingredients</h3>
-                    <table class="table ingredients">
-                        <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Name</th>
-                                <th>Amount</th>
-                                <th>Energy (kJ)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <%
-                            function toTitleCase(str) {
-                                return str.replace(
-                                    /\w\S*/g,
-                                    function(txt) {
-                                        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-                                    }
-                                );
-                            }
-                        %>
-                        <% for (let ing of nutrition.ingredients) { %>
-                            <tr>
-                                <td><img class="ingImg" src="<%= ing.photo.thumb %>" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
-                                <td><%= toTitleCase(ing.food_name) %></td>
-                                <td>
-                                    <%= Math.round(ing.serving_qty*100)/100 %> <%= ing.serving_unit %>
-                                    <% if (ing.serving_qty_metric && ing.serving_unit_metric) { %>
-                                        <br />(<%= ing.serving_qty_metric %> <%= ing.serving_unit_metric %>)
-                                    <% } %>
-                                </td>
-                                <td><%= ing.nf_energy %> kJ</td>
-                            </tr>
-                        <% } %>
-                        </tbody>
-                    </table>
+                    <form action="/Drink" method="GET" id="ingEditForm">
+                        <table class="table ingredients">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Name</th>
+                                    <th>Amount</th>
+                                    <th>Energy (kJ)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <%
+                                function toTitleCase(str) {
+                                    return str.replace(
+                                        /\w\S*/g,
+                                        function(txt) {
+                                            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                                        }
+                                    );
+                                }
+                            %>
+                            <% for (let i = 0; i<nutrition.ingredients.length; i++) { let ing = nutrition.ingredients[i]; %>
+                                <tr>
+                                    <td><img class="ingImg" src="<%= ing.photo.thumb %>" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
+                                    <td><%= toTitleCase(ing.food_name) %></td>
+                                    <td data-qty="<%= Math.round(ing.serving_qty*100)/100 %>" data-unit="<%= ing.serving_unit %>">
+                                        <span class="mr-3">
+                                            <%= Math.round(ing.serving_qty*100)/100 %> <%= ing.serving_unit %>
+                                            <% if (ing.serving_qty_metric && ing.serving_unit_metric) { %>
+                                                <br />(<%= ing.serving_qty_metric %> <%= ing.serving_unit_metric %>)
+                                            <% } %>
+                                        </span>
+                                        <i class="fas fa-edit editBtn"></i>
+                                        <% if (ing.edited) {%>
+                                            <div class="edited"><i class="fas fa-exclamation-circle"></i><span>Edited</span></div>
+                                            <input type="hidden" name="ingEditQty<%=i+1%>" value="<%= ing.serving_qty %>" />
+                                            <input type="hidden" name="ingEditUnit<%=i+1%>" value="<%= ing.serving_unit %>" />
+                                        <%}%>
+                                    </td>
+                                    <td><%= ing.nf_energy %> kJ</td>
+                                </tr>
+                            <% } %>
+                            </tbody>
+                        </table>
+                        <div id="editButtons" class="text-right">
+                            <input type="hidden" name="id" value="<%= id %>" />
+                            <a class="btn btn-secondary" href="/Drink?id=<%= id %>">Cancel Changes</a>
+                            <input type="submit" class="btn btn-primary" value="Update Nutrition" />
+                        </div>
+                    </form>
                     <h3>Method</h3>
                     <p><%= method %></p>
                 </div>

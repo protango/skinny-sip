@@ -27,6 +27,13 @@ async function drinkServerController(query) {
             measure: drink["strMeasure"+i] ? drink["strMeasure"+i].trim() : null
         };
         if (ing.ingredient) {
+            //apply user edits (if any)
+            let nQty = Number(query["ingEditQty"+i]), nUnit = query["ingEditUnit"+i];
+            if (!isNaN(nQty) && nUnit) {
+                ing.measure = nQty + " " + nUnit
+                ing.edited = true;
+            }
+            // default to 1 serving qty
             if (!ing.measure) ing.measure = "1 Serving";
             recipe.push(ing);
         }

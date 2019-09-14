@@ -161,3 +161,25 @@ p.desc {
 .nutritionTable .valRow.micro .nName {
     font-weight: 400;
 }
+
+.editBtn {
+    color: #b1b1b1;
+    cursor: pointer;
+}
+.editBtn:hover {
+    color: rgb(95, 95, 95);
+}
+
+#editButtons {
+    display: none;
+}
+
+.table.ingredients input {
+    width: 64px;
+}
+
+.edited {
+    color: red;
+    margin-top: 5px;
+    font-size: 12px;
+}
