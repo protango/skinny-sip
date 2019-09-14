@@ -7,6 +7,8 @@ const ingredientMap = require('./ingredientMap');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 const cache = JSON.parse(fs.readFileSync(__dirname + '/../../config/nutritionixCache.json'));
 
+const maxCacheEntries = 1000;
+
 /**
  * Returns the nutrition information for a given recipe object.
  * Will use cache where possible.
@@ -67,16 +69,19 @@ async function cachedNutritionix(recipe) {
         if (response.errors && response.errors.length) {
             handleNutritionixError(response, unknownLines);
         } else {
+            let cacheKeys = Object.keys(cache);
             for (let i = 0; i<response.foods.length; i++) {
                 // write to simulated response
                 simResponse.foods.splice(unknownLines[i].lineNo, 0, response.foods[i]);
-                // write to memory cache
-                cache[unknownLines[i].cacheKey] = response.foods[i];
+                // write to memory cache if there's room
+                if (cacheKeys.length < maxCacheEntries);
+                    cache[unknownLines[i].cacheKey] = response.foods[i];
             }
-            //save cache to disk
-            fs.writeFileSync(__dirname + '/../../config/nutritionixCache.json', JSON.stringify(cache), function(err) {
-                if(err) throw err;
-            });
+            // save cache to disk if there's room
+            if (cacheKeys.length < maxCacheEntries);
+                fs.writeFileSync(__dirname + '/../../config/nutritionixCache.json', JSON.stringify(cache), function(err) {
+                    if(err) throw err;
+                });
         }
     } else {
         console.log("Just served a 100% cached request!")
