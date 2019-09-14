@@ -58,6 +58,15 @@ router.get('/Random', async (req, res) => {
     res.redirect(302, '/Error?error='+e.message);
   }
 });
+// Ingredient route
+router.get('/Ingredient', async (req, res) => {
+  try {
+    res.render("ingredient", await require("./controllers/server/ingredient")(req.query));
+  } catch (e) {
+    console.log(e);
+    res.redirect(302, '/Error?error='+e.message);
+  }
+});
 
 
 // api routes

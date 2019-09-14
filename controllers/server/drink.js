@@ -47,7 +47,8 @@ async function drinkServerController(query) {
         tags: drink.strTags ? drink.strTags.split(",").map(x=>x.replace(/([a-z])([A-Z])/g, "$1 $2")) : [],
         glass: drink.strGlass,
         method: drink.strInstructions,
-        nutrition: await require("../../api/internal/nutrition")(recipe, drink.strDrink)
+        nutrition: await require("../../api/internal/nutrition")(recipe, drink.strDrink),
+        og_recipe: recipe
     }
 
     return result;

@@ -6,8 +6,8 @@
         <link rel="stylesheet" type="text/css" href="/css/site.css">
 
         <!-- Page Specific JS + CSS  -->
-        <link rel="stylesheet" type="text/css" href="/css/substitute.css">
-        <title>Skinny Sip - Unknown Ingredient</title>
+        <link rel="stylesheet" type="text/css" href="/css/search.css">
+        <title>Skinny Sip - Ingredient</title>
     </head>
     <body>
         <!-- Navbar -->
@@ -20,7 +20,7 @@
                 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item"><a class="nav-link" href="/">Search</a></li>
+                        <li class="nav-item active"><a class="nav-link" href="/">Search</a></li>
                         <li class="nav-item"><a class="nav-link" href="/Random">Random</a></li>
                         <li class="nav-item"><a class="nav-link" href="/About">About</a></li>
                     </ul>
@@ -39,47 +39,29 @@
 
         <!-- Body -->
         <div class="container" id="resultContainer">
-            <h1>Unknown Ingredient</h1>
-            <p>
-                We couldn't find any nutrition info for the ingredient: "<%= ingredient %>"<br>
-                Please enter a similar/generic ingredient below, and we'll use the nutrition information from that instead.
-            </p>
-            <form class="mt-5" id="substituteForm" method="POST", action="/api/Substitute">
-                <input type="hidden" name="drinkId" value="<%= drinkId %>" />
-                <input type="hidden" name="ingredient" value="<%= ingredient %>" />
-                <div class="row">
-                    <div class="col-5 text-center">
-                        <h5>Original:</h5>
-                        <table>
-                            <tr>
-                                <td>
-                                    <img src="https://www.thecocktaildb.com/images/ingredients/<%= ingredient %>-Small.png" onerror="this.onerror=null; this.src='/img/noImage.png'" />
-                                </td>
-                                <td class="align-middle">
-                                    <%= ingredient %>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-2 text-center"><i class="fas fa-arrow-right"></i></div>
-                    <div class="col-5 text-center">
-                        <h5>Nutritional Substitute:</h5>
-                        <div id="grpInput" class="input-group p-relative">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
-                            </div>
-                            <input name="substitute" id="substitute" type="text" class="form-control" placeholder="Search for ingredient">
-                            <div id="autofill" class="dropdown-menu p-absolute" style="display: none; width: 100%;">
-                            </div>
-                        </div>
-                    </div>
+            <h1 style="margin: unset;"><%=ingredient%></h1>
+            <i><%=subName%></i>
+            <div class="row">
+                <div class="col-3">
+                    <img style="max-width: 255px" src="https://www.thecocktaildb.com/images/ingredients/<%=ingredient%>-Medium.png" class="d-block mx-auto" onerror="this.onerror=null; this.src='/img/noImage.png'" />
                 </div>
-                <div class="text-center">
-                    <input id="submitSub" type="submit" class="btn btn-primary mt-3" /><br>
-                    <span id="ddWarn">You must select an option from the dropdown to submit this form</span> 
+                <div class="col-9">
+                    <p><%=desc%></p>
                 </div>
-            </form>
-            
+            </div>
+            <h3>Drinks that contain this ingredient</h3>
+            <% if (!drinks.length) {%>
+                <div id="noResults"><p>Nothing Found :(</p></div>
+            <%}%>
+            <% for(let c of drinks) {%>
+                <a id="resultTemplate" class="result" href="/Drink?id=<%=c.idDrink%>">
+                    <img src="<%=c.strDrinkThumb%>" />
+                    <div>
+                        <h4><%=c.strDrink%></h4>
+                        <p><i><%=c.strDrink%></i></p>
+                    </div>
+                </a>
+            <%}%>
         </div>
         <!-- Footer -->
         <footer class="footer bg-light">
@@ -104,6 +86,5 @@
                 </div>
             </div>
         </footer>
-        <script src="/controllers/substitute.js"></script>
     </body>
 </html>

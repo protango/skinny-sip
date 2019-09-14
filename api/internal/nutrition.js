@@ -1,4 +1,5 @@
 const fs = require('fs');
+const cloneDeep = require('clone-deep');
 const cachedNutritionix = require('./cachedNutritionix');
 const ingredientMap = require('./ingredientMap');
 const microNutrients = JSON.parse(fs.readFileSync(__dirname + '/../../config/micronutrients.json')).microNutrients;
@@ -9,6 +10,7 @@ const microNutrients = JSON.parse(fs.readFileSync(__dirname + '/../../config/mic
  * @param {string} drinkName The name of the drink you are querying information for
  */
 async function internalNutritionApi(recipe, drinkName) {
+    recipe = cloneDeep(recipe);
     let result = {microNutrients: microNutrients}; // we send micronutrients to the scope for rendering
     fixUnknownMeasures(recipe); // fix badly formatted measures in cocktail DB
     fixUnknownIngredients(recipe); // re-map known bad ingredients to their known substitute

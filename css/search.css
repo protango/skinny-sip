@@ -25,6 +25,7 @@
 .result>div {
     float: left;
     margin-left: 10px;
+    max-width: 390px;
 }
 .result>div>div {
     font-size: 14pt;
@@ -33,3 +34,4 @@
   h1 {
       margin-bottom: 30px;
   }
+
