@@ -10,7 +10,7 @@ $("i.editBtn").on("click", (e)=> {
 
     let number = Number(cell.attr("data-qty"));
     let unit = cell.attr("data-unit").toLowerCase();
-    if (unit.includes("fruit ")) unit = "fruit";
+    if (unit.includes("fruit ") || unit.includes("lime")) unit = "serving";
     if (unit.includes("can ")) unit = "can";
 
     let allowedUnits = ["serving", "g", "ml", "oz", "fl oz", "cup", "tsp", "tbsp", "pinch", "shot", "dash"];

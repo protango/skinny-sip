@@ -28,6 +28,8 @@ async function cachedNutritionix(recipe) {
             unit = matches[2];
         } 
         if (qty && unit) { // translate common things to oz
+            line.qty = qty;
+            line.unit = unit;
             let unitTranslation = null;
             if (unit === "cups" || unit === "shots") unit = unit.substring(0, unit.length - 1);
             if (unit === "fl oz") unitTranslation = {og_unit: unit, unit: "oz", scaleFactor: 1/1.040843};
@@ -37,6 +39,8 @@ async function cachedNutritionix(recipe) {
                 line.unitTranslation = unitTranslation;
                 qty *= unitTranslation.scaleFactor;
                 unit = unitTranslation.unit;
+                line.qty = qty;
+                line.unit = unit;
             }
         }
 
@@ -56,7 +60,9 @@ async function cachedNutritionix(recipe) {
         }
     }
     if (unknownLines.length) {
-        let nlpRecipe = unknownLines.map(x=>x.measure+" "+x.ingredient).join("\n");
+        let nlpRecipe = unknownLines.map(x=>
+            (x.qty && x.unit ? "100 " + x.unit : x.measure) +" "+x.ingredient
+        ).join("\n");
         // get nutritionix response
         let response = {};
         try {
@@ -80,11 +86,19 @@ async function cachedNutritionix(recipe) {
         } else {
             let cacheKeys = Object.keys(cache);
             for (let i = 0; i<response.foods.length; i++) {
-                // write to simulated response
-                simResponse.foods.splice(unknownLines[i].lineNo, 0, response.foods[i]);
                 // write to memory cache if there's room
                 if (cacheKeys.length < maxCacheEntries);
                     cache[unknownLines[i].cacheKey] = cloneDeep(response.foods[i]);
+
+                // rescale values if this was a "smart" search
+                if (unknownLines[i].qty && unknownLines[i].unit) {
+                    let scale = 1/response.foods[i].serving_qty*unknownLines[i].qty;
+                    response.foods[i] = scaleNutritionObj(response.foods[i], scale);
+                }
+
+                // write to simulated response
+                simResponse.foods.splice(unknownLines[i].lineNo, 0, response.foods[i]);
+
             }
             // save cache to disk if there's room
             if (cacheKeys.length < maxCacheEntries);
@@ -101,7 +115,6 @@ async function cachedNutritionix(recipe) {
         if (!recipe[i].unitTranslation) continue;
         simResponse.foods[i].serving_unit = recipe[i].unitTranslation.og_unit;
         simResponse.foods[i].serving_qty /= recipe[i].unitTranslation.scaleFactor;
-        simResponse.foods[i].serving_weight_grams *= recipe[i].unitTranslation.scaleFactor;
     }
     return simResponse;
 }
@@ -116,6 +129,7 @@ function scaleNutritionObj(obj, scale) {
     // get a list of keys that correspond to nutrition values
     let nfKeys = Object.keys(obj).filter(x=>x.startsWith("nf_")); 
     obj.serving_qty *= scale;
+    obj.serving_weight_grams *= scale;
     for (let key of nfKeys)
         obj[key] *= scale;
     for (let microN of obj.full_nutrients) 
