@@ -1,5 +1,9 @@
 const request = require('request-promise-native');
 
+/**
+ * Binds API endpoints to the router related to getting search results
+ * @param {Router} router The router object to attach the API to
+ */
 function searchApi(router) {
     router.get('/api/Search/:text', async (req, res) => {
         res.setHeader('Content-Type', 'application/json');

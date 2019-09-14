@@ -1,7 +1,8 @@
 var debounceautofilltimeout = null;
 var goodSelection = false;
+// keydown handler for displaying autofill results
 $("#substitute").on("keydown", (e) => {
-    if (e.key==="ArrowDown") {
+    if (e.key==="ArrowDown") { // handle keyboard navigation of dropdown [Down]
         let activeitem = $(".dropdown-item.active");
         if (activeitem.length) {
             activeitem.removeClass("active");
@@ -15,7 +16,7 @@ $("#substitute").on("keydown", (e) => {
             $(".dropdown-item:first-child").addClass("active");
         }
         return false;
-    } else if (e.key==="ArrowUp") {
+    } else if (e.key==="ArrowUp") {// handle keyboard navigation of dropdown [Up]
         let activeitem = $(".dropdown-item.active");
         if (activeitem.length) {
             activeitem.removeClass("active");
@@ -29,18 +30,19 @@ $("#substitute").on("keydown", (e) => {
             $(".dropdown-item:last-child").addClass("active");
         }
         return false;
-    } else if (e.key==="Enter") {
+    } else if (e.key==="Enter") { // handle keyboard navigation of dropdown [Enter]
         $(".dropdown-item.active").mousedown();
         $("#autofill").hide();
         e.preventDefault();
         return false;
     }
-    if (debounceautofilltimeout) {
+    if (debounceautofilltimeout) { // if a debounce timer is already in progress, cancel it.
         clearTimeout(debounceautofilltimeout);
+        debounceautofilltimeout = null;
     }
     $("#autofill").empty();
     goodSelection = false;
-    debounceautofilltimeout = setTimeout(function() { 
+    debounceautofilltimeout = setTimeout(function() { // wait 300ms before querying server, to facilitate debouncing
         debounceautofilltimeout = null;
         $.get("/api/IngredientAutoComplete/"+$("#substitute").val(), (response) => {
             if (!(response && response.common)) return;

@@ -1,5 +1,9 @@
 const request = require('request-promise-native');
 
+/**
+ * Binds API endpoints to the router related to getting random drinks
+ * @param {Router} router The router object to attach the API to
+ */
 function randomApi(router) {
     router.get('/api/Random/:number', async (req, res) => {
         res.setHeader('Content-Type', 'application/json');

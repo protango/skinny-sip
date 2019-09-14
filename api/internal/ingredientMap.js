@@ -4,11 +4,22 @@ const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.js
 const mappings = JSON.parse(fs.readFileSync(__dirname + '/../../config/unknownIngredientsMap.json'));
 
 module.exports = {
+    /**
+     * Remaps an ingredient to a similar one known by nutritionix, if the ingredient is not mapped, returns the original ingredient
+     * @param {string} ingredient 
+     */
     map: function (ingredient) {
         let mapping = mappings[ingredient];
         if (mapping && mapping.replacement) return mapping.replacement;
         return ingredient;
     }, 
+    /**
+     * Saves a new ingredient mapping. 
+     * The ingredient must be marked as "needsReplacement" before using this function.
+     * Throws exception if the substitute is not known by nutirtionix
+     * @param {string} ingredient The original ingredient
+     * @param {string} substitute The substitute ingredient
+     */
     save: async function (ingredient, substitute) {
         // test that request is properly formed
         if (!ingredient || !substitute) throw new Error("Bad Request");
@@ -35,6 +46,11 @@ module.exports = {
             if(err) throw err;
         }); 
     },
+    /**
+     * Flags an ingredient as unknown by nutritionix, this allows it to be replaced through the "save" function.
+     * This system is in place for security
+     * @param {*} ingredient The ingredient that needs a replacement
+     */
     needsReplacement: function(ingredient) {
         mappings[ingredient.toLowerCase()] = {needsReplacement: true};
         fs.writeFileSync(__dirname + '/../../config/unknownIngredientsMap.json', JSON.stringify(mappings));

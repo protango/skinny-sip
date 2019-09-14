@@ -2,6 +2,10 @@ const request = require('request-promise-native');
 const fs = require('fs');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 
+/**
+ * Builds an object for use by the drinks page EJS template
+ * @param {Object} query An object containing the query string parameters 
+ */
 async function drinkServerController(query) {
     let id = Number(query.id);
     if (isNaN(Number(id))) throw new Error("Invalid Id");

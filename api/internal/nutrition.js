@@ -3,6 +3,11 @@ const cachedNutritionix = require('./cachedNutritionix');
 const ingredientMap = require('./ingredientMap');
 const microNutrients = JSON.parse(fs.readFileSync(__dirname + '/../../config/micronutrients.json')).microNutrients;
 
+/**
+ * Gets an object containing a drinks aggregate nutrition content, and individual ingredients nutirtion content.
+ * @param {recipe} recipe A recipe object for the drink you are querying
+ * @param {string} drinkName The name of the drink you are querying information for
+ */
 async function internalNutritionApi(recipe, drinkName) {
     let result = {microNutrients: microNutrients}; // we send micronutrients to the scope for rendering
     fixUnknownMeasures(recipe); // fix badly formatted measures in cocktail DB
@@ -99,7 +104,11 @@ function fixUnknownMeasures(recipe) {
     }
 }
 
-// merge individual nutrition objects into one
+/**
+ * Merge individual nutrition objects into one
+ * @param {nutirtionObj[]} indivResults individual foods nutrition results
+ * @param {string} newName the name of the aggregate nutrition object
+ */
 function aggregateNutrition(indivResults, newName) {
     if (!indivResults || !indivResults.length) return {};
     let result = Object.assign({}, indivResults[0]);

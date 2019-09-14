@@ -3,6 +3,10 @@ const fs = require('fs');
 const ingredientMap = require('./internal/ingredientMap');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../config/apiKeys.json')).apiKeys;
 
+/**
+ * Binds API endpoints to the router related to substituting ingredients
+ * @param {Router} router The router object to attach the API to
+ */
 function substituteApi(router) {
     // simply pass through the response from the nutirtionix api to the client, we do this to hide our API key
     router.get('/api/IngredientAutoComplete/:text', async (req, res) => {

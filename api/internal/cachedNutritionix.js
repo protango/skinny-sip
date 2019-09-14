@@ -7,6 +7,11 @@ const ingredientMap = require('./ingredientMap');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 const cache = JSON.parse(fs.readFileSync(__dirname + '/../../config/nutritionixCache.json'));
 
+/**
+ * Returns the nutrition information for a given recipe object.
+ * Will use cache where possible.
+ * @param {recipe} recipe The recipe
+ */
 async function cachedNutritionix(recipe) {
     let unknownLines = [];
     let simResponse = {foods: []};
@@ -79,6 +84,12 @@ async function cachedNutritionix(recipe) {
     return simResponse;
 }
 
+/**
+ * Multiplies all nutirtion values in a nutrition object by the scale factor.
+ * This function modifies the original object.
+ * @param {nutritionObj} obj The nutiriton object
+ * @param {number} scale The scale factor
+ */
 function scaleNutritionObj(obj, scale) {
     // get a list of keys that correspond to nutrition values
     let nfKeys = Object.keys(obj).filter(x=>x.startsWith("nf_")); 
@@ -90,7 +101,12 @@ function scaleNutritionObj(obj, scale) {
     return obj;
 }
 
-// Try to handle a nutritionix error
+/**
+ * Try to handle a nutritionix error response message.
+ * Either re-throws the error, or raises a needs substitute message.
+ * @param {*} response The response returned by nutritionix
+ * @param {*} recipe The original recipe object that was sent
+ */
 function handleNutritionixError(response, recipe) {
     console.log(response);
     let err_code = response.errors[0].err_code;

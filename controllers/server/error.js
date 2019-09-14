@@ -2,6 +2,10 @@ const request = require('request-promise-native');
 const fs = require('fs');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 
+/**
+ * Builds an object for use by the error page EJS template
+ * @param {Object} query An object containing the query string parameters 
+ */
 async function errorServerController() {
     result = {
         cocktaildbOnline: false,
