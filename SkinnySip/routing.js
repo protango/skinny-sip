@@ -6,17 +6,17 @@ const router = express.Router();
 
 // index route
 router.get('/', (req, res) => {
-  res.render("index");
+  res.render("index", {active: "Search"});
 });
 
 // search route
 router.get('/Search', (req, res) => {
-  res.render("search");
+  res.render("search", {active: "Search"});
 });
 
 // about route
 router.get('/About', (req, res) => {
-  res.render("about");
+  res.render("about", {active: "About"});
 });
 
 // drink route
@@ -66,6 +66,10 @@ router.get('/Ingredient', async (req, res) => {
     console.log(e);
     res.redirect(302, '/Error?error='+e.message);
   }
+});
+// Login route
+router.get('/Login', async (req, res) => {
+  res.render("login", {active: "Login"});
 });
 
 

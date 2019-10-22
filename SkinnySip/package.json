@@ -21,6 +21,7 @@
     "escape-html": "^1.0.3",
     "express": "^4.17.1",
     "jquery": "^3.4.1",
+    "mssql": "^5.1.0",
     "popper.js": "^1.15.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7"
