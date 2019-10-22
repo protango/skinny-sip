@@ -69,7 +69,7 @@ router.get('/Ingredient', async (req, res) => {
 });
 // Login route
 router.get('/Login', async (req, res) => {
-  res.render("login", {active: "Login"});
+  res.render("login", {active: "Login", ...req.query});
 });
 
 
@@ -77,6 +77,7 @@ router.get('/Login', async (req, res) => {
 require("./api/search")(router);
 require("./api/random")(router);
 require("./api/substitute")(router);
+require("./api/login")(router);
 
 // Expose images
 router.use('/img', express.static(__dirname + '/img/'));

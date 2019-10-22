@@ -8,8 +8,46 @@
 
         <!-- Body -->
         <div class="container" id="resultContainer">
-            <h1>Login</h1>
-            <p>This application is brought to you by Zachary Murray.<br>It relies on API's provided by "TheCocktailDB" and "Nutritionix."</p>
+            <div style="float: left; width: 50%; padding-right: 20px; border-right: 1px gainsboro solid">
+                <h1>Register</h1>
+                <form action="/api/register" method="POST">
+                    <div class="form-group">
+                        <label for="rg_username">Username*</label>
+                        <input class="form-control" name="username" id="rg_username" type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label for="fullName">Full Name*</label>
+                        <input class="form-control" name="fullName" id="fullName" type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label for="rg_password">Password*</label>
+                        <input class="form-control" name="password" id="rg_password" type="password" />
+                    </div>
+                    <div class="form-group">
+                        <label for="rg_rpt_password">Repeat Password*</label>
+                        <input class="form-control" name="rpt_password" id="rg_rpt_password" type="password" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                    <small class="form-text text-muted">* indicates that field is mandatory</small>
+                </form>
+            </div>
+            <div style="float: left; width: 50%; padding-left: 20px;">
+                <h1>Login</h1>
+                <form action="/api/login" method="POST">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input class="form-control" name="username" id="username" type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input class="form-control" name="password" id="password" type="password" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <% if (locals.loginstatus) {%> 
+                        <small class="form-text text-danger"><%=loginstatus%></small>
+                    <%}%>
+                </form>
+            </div>
         </div>
         <!-- Footer -->
         <footer class="footer bg-light">

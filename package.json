@@ -16,7 +16,6 @@
     "@fortawesome/fontawesome-free": "^5.10.2",
     "bootstrap": "^4.3.1",
     "clone-deep": "^4.0.1",
-    "crypto": "^1.0.1",
     "ejs": "^2.7.1",
     "escape-html": "^1.0.3",
     "express": "^4.17.1",
