@@ -12,7 +12,7 @@ const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/config/apiKeys.json')).
 sql.connect(apiKeys.dbConnString)
 
 // Constants
-const PORT = 8081;
+const PORT = 8080;
 const HOST = '0.0.0.0';
 
 // App
