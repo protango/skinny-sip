@@ -1,11 +1,10 @@
 const express = require('express');
 const sql = require('mssql');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 const fs = require('fs');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../config/apiKeys.json')).apiKeys;
-
-sql.connect(apiKeys.dbConnString)
 
 /**
  * Binds API endpoints to the router related to login
@@ -22,9 +21,11 @@ function loginApi(router) {
 
         if (result.recordset.length > 0) {
             // yay
+            res.cookie('auth', jwt.sign({ sub: username }, apiKeys.jwtSecret, { expiresIn: '1h' }), { maxAge: 3600000 });
             res.redirect(302, '/');
         } else {
             // nay
+            res.clearCookie('auth');
             res.redirect(302, '/Login?loginstatus=Incorrect%20username%20and%2For%20password');
         }
     });

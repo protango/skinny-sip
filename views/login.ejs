@@ -13,21 +13,27 @@
                 <form action="/api/register" method="POST">
                     <div class="form-group">
                         <label for="rg_username">Username*</label>
-                        <input class="form-control" name="username" id="rg_username" type="text" />
+                        <input required class="form-control" name="username" id="rg_username" type="text" value="<% if (locals.regun) {%><%=regun%><%}%>" />
                     </div>
                     <div class="form-group">
                         <label for="fullName">Full Name*</label>
-                        <input class="form-control" name="fullName" id="fullName" type="text" />
+                        <input required class="form-control" name="fullName" id="fullName" type="text" value="<% if (locals.regfn) {%><%=regfn%><%}%>" />
                     </div>
                     <div class="form-group">
                         <label for="rg_password">Password*</label>
-                        <input class="form-control" name="password" id="rg_password" type="password" />
+                        <input required class="form-control" name="password" id="rg_password" type="password" />
                     </div>
                     <div class="form-group">
                         <label for="rg_rpt_password">Repeat Password*</label>
-                        <input class="form-control" name="rpt_password" id="rg_rpt_password" type="password" />
+                        <input required class="form-control" name="rpt_password" id="rg_rpt_password" type="password" />
                     </div>
                     <button type="submit" class="btn btn-primary">Register</button>
+                    <% if (locals.registerstatus) {%> 
+                        <small class="form-text text-danger"><%=registerstatus%></small>
+                    <%}%>
+                    <% if (locals.registergood) {%> 
+                        <small class="form-text text-success">Registration successful, you can now login</small>
+                    <%}%>
                     <small class="form-text text-muted">* indicates that field is mandatory</small>
                 </form>
             </div>

@@ -16,3 +16,18 @@
         </div>
     </div>
 </nav>
+<script>
+    let auth = Cookies.get('auth');
+    if (auth) {
+        try {
+            let payload = JSON.parse(atob(auth.split(".")[1]));
+            if (payload.sub) {
+                let elem = $("li.nav-item a[href='/Login']");
+                elem.html("Logout: "+payload.sub);
+                elem.click(()=>{
+                    Cookies.remove("auth");
+                });
+            }
+        } catch {}
+    }
+</script>
