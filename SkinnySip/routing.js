@@ -6,17 +6,17 @@ const router = express.Router();
 
 // index route
 router.get('/', (req, res) => {
-  res.sendFile("views/index.html", { root: __dirname });
+  res.render("index");
 });
 
 // search route
 router.get('/Search', (req, res) => {
-  res.sendFile("views/search.html", { root: __dirname });
+  res.render("search");
 });
 
 // about route
 router.get('/About', (req, res) => {
-  res.sendFile("views/about.html", { root: __dirname });
+  res.render("about");
 });
 
 // drink route

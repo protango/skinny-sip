@@ -1,41 +1,13 @@
 <html>
     <head>
-        <!-- Global JS + CSS  -->
-        <script src="/inc/jquery/jquery.min.js"></script>
-        <script src="/inc/bootstrap/js/bootstrap.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="/css/site.css">
+        <% include includes/globalcsshtml.ejs %>
 
         <!-- Page Specific JS + CSS  -->
         <link rel="stylesheet" type="text/css" href="/css/search.css">
         <title>Skinny Sip - Search</title>
     </head>
     <body>
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a class="navbar-brand" href="/"><i class="fas fa-cocktail"></i>Skinny Sip</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item active"><a class="nav-link" href="/">Search</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Random">Random</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/About">About</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        <!-- Search Bar -->
-        <form class="searchForm" method="GET" action="/Search">
-            <div class="container">
-                <div class="row align-items-center h-100">
-                    <div class="col-10 pr-0"><input name="term" type="text" class="form-control form-control-lg" placeholder="Enter a cocktail name..." /></div>
-                    <div class="col-2"><button type="submit" class="btn btn-block btn-lg btn-primary">Search</button></div>
-                </div>
-            </div>
-        </form>
+        <% include includes/header.ejs %>
 
         <!-- Body -->
         <div class="container" id="resultContainer">

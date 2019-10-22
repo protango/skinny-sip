@@ -1,34 +1,15 @@
 <html>
     <head>
         <% include includes/globalcsshtml.ejs %>
-
-        <!-- Page Specific JS + CSS  -->
-        <link rel="stylesheet" type="text/css" href="/css/error.css">
-        <title>Skinny Sip - Error</title>
+        <title>Skinny Sip - About</title>
     </head>
     <body>
         <% include includes/header.ejs %>
 
         <!-- Body -->
         <div class="container" id="resultContainer">
-            <h1>Error</h1>
-            <p>
-                We're sorry, but your request couldn't be fulfilled, please try again later
-                <% if (locals.error != null) { %>
-                    <br /><br /><b>Details: </b><br /><%- error.replace("\n", "<br>") %>
-                <% } %>
-            </p>
-            <h5>Service Status:</h5>
-
-            <p class="<%= cocktaildbOnline ? "success" : "fail" %>">
-                <i class="fas fa-<%= cocktaildbOnline ? "check" : "times" %>-circle"></i> 
-                Cocktail DB is <%= cocktaildbOnline ? "online" : "offline" %>
-            </p>
-            <p class="<%= nutritionixOnline ? "success" : "fail" %>">
-                <i class="fas fa-<%= nutritionixOnline ? "check" : "times" %>-circle"></i> 
-                Nutritionix is <%= nutritionixOnline ? "online" : "offline" %>
-            </p>
-            
+            <h1>About</h1>
+            <p>This application is brought to you by Zachary Murray.<br>It relies on API's provided by "TheCocktailDB" and "Nutritionix."</p>
         </div>
         <!-- Footer -->
         <footer class="footer bg-light">
