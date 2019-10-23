@@ -4,6 +4,6 @@
         "x-app-key": "468dbab1e189d87d17155c5afa1ad6e3"
     },
     "cocktailDB": 1,
-    "dbConnString": "mssql://cocktailAdmin:t@bles4You@cocktails-server.database.windows.net/cocktails-database?encrypt=true",
+    "dbConnString": "mssql://cocktailAdmin:t@bles4You@skinnysip-server.database.windows.net/cocktails-database-aus?encrypt=true",
     "jwtSecret": "n9710418"
 }}
