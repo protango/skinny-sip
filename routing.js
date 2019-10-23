@@ -3,55 +3,34 @@ const escape = require('escape-html');
 const request = require('request-promise-native');
 const jwt = require('jsonwebtoken');
 const sql = require('mssql');
+const userManager = require('./api/internal/userManager');
 
 const fs = require('fs');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/config/apiKeys.json')).apiKeys;
 
 const router = express.Router();
 
-/**
- * Refreshes a users auth session, if there is one. Also returns the username of the current user, or null if no one is logged in
- * @param {express.Request} req 
- * @param {express.Response} res 
- * @returns {string} The currently logged in username
- */
-function refreshAuth(req, res) {
-  let auth = req.cookies.auth;
-  if (auth) {
-    try {
-      let payload = jwt.verify(auth, apiKeys.jwtSecret);
-      res.cookie('auth', jwt.sign({ sub: payload.sub }, apiKeys.jwtSecret, { expiresIn: '1h' }), { maxAge: 3600000 });
-      return payload.sub;
-    } catch {
-      res.clearCookie("auth");
-      return null;
-    }
-  } else {
-    return null;
-  }
-}
-
 // index route
 router.get('/', (req, res) => {
-  refreshAuth(req, res);
+  userManager.refreshAuth(req, res);
   res.render("index", {active: "Search"});
 });
 
 // search route
 router.get('/Search', (req, res) => {
-  refreshAuth(req, res);
+  userManager.refreshAuth(req, res);
   res.render("search", {active: "Search"});
 });
 
 // about route
 router.get('/About', (req, res) => {
-  refreshAuth(req, res);
+  userManager.refreshAuth(req, res);
   res.render("about", {active: "About"});
 });
 
 // drink route
 router.get('/Drink', async (req, res) => {
-  refreshAuth(req, res);
+  userManager.refreshAuth(req, res);
   try {
     res.render("drink", await require("./controllers/server/drink")(req.query));
   } catch(e) {
@@ -66,13 +45,13 @@ router.get('/Drink', async (req, res) => {
 
 // error route
 router.get('/Error', async (req, res) => {
-  refreshAuth(req, res);
+  userManager.refreshAuth(req, res);
   res.render("error", {error: escape(req.query.error), ...await require("./controllers/server/error")()});
 });
 
 // substitute route
 router.get('/Substitute', (req, res) => {
-  refreshAuth(req, res);
+  userManager.refreshAuth(req, res);
   try {
     res.render("substitute", req.query);
   } catch (e) {
@@ -83,7 +62,7 @@ router.get('/Substitute', (req, res) => {
 
 // Random route
 router.get('/Random', async (req, res) => {
-  refreshAuth(req, res);
+  userManager.refreshAuth(req, res);
   try {
     let result = await sql.query`SELECT TOP (1) r.id FROM dbo.recipes r ORDER BY newid()`;
     res.redirect(302, '/Drink?id='+result.recordset[0].id);
@@ -94,7 +73,7 @@ router.get('/Random', async (req, res) => {
 });
 // Ingredient route
 router.get('/Ingredient', async (req, res) => {
-  refreshAuth(req, res);
+  userManager.refreshAuth(req, res);
   try {
     res.render("ingredient", await require("./controllers/server/ingredient")(req.query));
   } catch (e) {
@@ -104,7 +83,7 @@ router.get('/Ingredient', async (req, res) => {
 });
 // Login route
 router.get('/Login', async (req, res) => {
-  refreshAuth(req, res);
+  userManager.refreshAuth(req, res);
   res.render("login", {active: "Login", ...req.query});
 });
 
