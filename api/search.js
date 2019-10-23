@@ -8,30 +8,21 @@ const sql = require('mssql');
 function searchApi(router) {
     router.get('/api/Search/:text', async (req, res) => {
         res.setHeader('Content-Type', 'application/json');
+        let like = '%'
         let result = [];
-        let text = req.params.text;
+        let text = like.concat(req.params.text,like);
         if (text.length >= 1) {
-
-            let result = await sql.query`SELECT * FROM dbo.recipes WHERE name LIKE '%A${text}%'`;
-            console.log(result.output)
-
-            
-
-            //let body =  await request({
-            //    uri: 'https://www.thecocktaildb.com/api/json/v1/1/search.php',
-            //    qs: {s: text },
-            //    json: true
-            //});
-            //if (body.drinks) 
-            //    result = body.drinks.map(x=>{return {
-            //        name: x.strDrink,
-            //        id: x.idDrink,
-            //        desc: x.strCategory,
-            //        img: x.strDrinkThumb,
-            //        tags: x.strTags ? x.strTags.split(",").map(x=>x.replace(/([a-z])([A-Z])/g, "$1 $2")) : []
-            //    }});
-
-            //res.send(result);
+            let result = await sql.query`SELECT * FROM dbo.recipes WHERE name LIKE ${text}`;
+            if (result.recordset.length > 0){
+                result = result.recordset.map(x=>{return {
+                            name: x.name,
+                            id: x.id,
+                            desc: x.category,
+                            img: x.imageURL,
+                            tags: []
+                        }});
+            }
+            res.send(result);
         } else {
             res.send([]);
         }
