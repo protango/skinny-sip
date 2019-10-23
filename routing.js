@@ -2,6 +2,7 @@ const express = require('express');
 const escape = require('escape-html');
 const request = require('request-promise-native');
 const jwt = require('jsonwebtoken');
+const sql = require('mssql');
 
 const fs = require('fs');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/config/apiKeys.json')).apiKeys;
@@ -84,8 +85,8 @@ router.get('/Substitute', (req, res) => {
 router.get('/Random', async (req, res) => {
   refreshAuth(req, res);
   try {
-    let result = await request({uri: 'https://www.thecocktaildb.com/api/json/v1/1/random.php', json: true});
-    res.redirect(302, '/Drink?id='+result.drinks[0].idDrink);
+    let result = await sql.query`SELECT TOP (1) r.id FROM dbo.recipes r ORDER BY newid()`;
+    res.redirect(302, '/Drink?id='+result.recordset[0].id);
   } catch (e) {
     console.log(e);
     res.redirect(302, '/Error?error='+e.message);
