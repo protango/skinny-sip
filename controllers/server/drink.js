@@ -46,6 +46,7 @@ async function drinkServerController(query) {
     Inner Join dbo.users u on u.id = c.userId 
     WHERE r.id = ${id}`;
 
+    let commentResult = [];
     if (result.recordset.length > 0){
         commentResult = result.recordset.map(x=>{return {
                     username: x.username,

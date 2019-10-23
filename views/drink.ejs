@@ -167,12 +167,19 @@
                             <% } %>
                             </tbody>
                         </table>
-                        <input class="addCommentBox" type="text" name="comment">
-                        <input class="addCommentButton" type="submit" value="Add Comment">
+                        <textarea class="addCommentBox form-control" type="text" name="comment"></textarea>
+                        <button class="btn-primary btn addCommentButton" type="submit">Add Comment</button>
+                        <script>
+                            let elem = $("li.nav-item a[href='/Login']");
+                            if (elem.html() === "Login") {
+                                $(".addCommentButton").attr("disabled", true);
+                                $(".addCommentButton").html("Log in to comment");
+                            }
+                        </script>
                     </form>
                 </div>                
             </div>
-            <div class="row mt-5">
+            <div class="row mt-5"></div>
         </div>
         <!-- Footer -->
         <footer class="footer bg-light">
