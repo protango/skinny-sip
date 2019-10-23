@@ -12,14 +12,14 @@ function searchApi(router) {
         let result = [];
         let text = like.concat(req.params.text,like);
         if (text.length >= 1) {
-            let result = await sql.query`SELECT * FROM dbo.recipes WHERE name LIKE ${text}`;
+            let result = await sql.query`SELECT r.id, r.name, r.category, r.imageURL, u.username FROM dbo.recipes r LEFT JOIN dbo.users u ON u.id = r.userId WHERE name LIKE ${text}`;
             if (result.recordset.length > 0){
                 result = result.recordset.map(x=>{return {
                             name: x.name,
                             id: x.id,
                             desc: x.category,
                             img: x.imageURL,
-                            tags: []
+                            tags: x.username ? [x.username] : []
                         }});
             }
             res.send(result);

@@ -1,4 +1,5 @@
 const request = require('request-promise-native');
+const sql = require('mssql');
 
 /**
  * Binds API endpoints to the router related to getting random drinks
@@ -11,23 +12,16 @@ function randomApi(router) {
         let number = Number(req.params.number);
 
         if (!isNaN(Number(number))) {
-            let promises = [];
-            for (let i = 0; i<number; i++) {
-                promises.push(
-                    request({
-                        uri: 'https://www.thecocktaildb.com/api/json/v1/1/random.php',
-                        json: true
-                    })
-                );
+            let result = await sql.query`SELECT TOP (${number}) r.id, r.name, r.category, r.imageURL, u.username FROM dbo.recipes r LEFT JOIN dbo.users u ON u.id = r.userId ORDER BY newid()`;
+            if (result.recordset.length > 0){
+                result = result.recordset.map(x=>{return {
+                            name: x.name,
+                            id: x.id,
+                            desc: x.category,
+                            img: x.imageURL,
+                            tags: x.username ? [x.username] : []
+                }});
             }
-            result = await Promise.all(promises);
-            result = result.map(x=>{return {
-                name: x.drinks[0].strDrink,
-                id: x.drinks[0].idDrink,
-                desc: x.drinks[0].strCategory,
-                img: x.drinks[0].strDrinkThumb,
-                tags: x.drinks[0].strTags ? x.drinks[0].strTags.split(",") : []
-            }});
             res.send(result);
         } else {
             res.send(result);

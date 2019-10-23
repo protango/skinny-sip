@@ -1,15 +1,14 @@
 'use strict';
-
-const express = require('express');
-const path = require('path')
-const routes = require('./routing');
-const cookieParser = require('cookie-parser');
-
 // setup global sql connection
 const fs = require('fs');
 const sql = require('mssql');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/config/apiKeys.json')).apiKeys;
 sql.connect(apiKeys.dbConnString)
+
+const express = require('express');
+const path = require('path')
+const routes = require('./routing');
+const cookieParser = require('cookie-parser');
 
 // Constants
 const PORT = 8080;
