@@ -1,6 +1,4 @@
-const request = require('request-promise-native');
-const fs = require('fs');
-const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../config/apiKeys.json')).apiKeys;
+const sql = require('mssql');
 
 /**
  * Binds API endpoints to the router related to editing recipes
@@ -9,7 +7,12 @@ const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../config/apiKeys.json'
 function instantEditingApi(router) {
     // simply pass through the response from the nutirtionix api to the client, we do this to hide our API key
     router.get('/api/instantIngredient/:text', async (req, res) => {
-        
+        res.setHeader('Content-Type', 'application/json');
+        let text = req.params.text;
+        if (!text || text.length < 3) return [];
+        let r = await sql.query`
+            SELECT TOP(10) [name], id from ingredients where [name] LIKE '%${text}%'`;
+        return r.recordset;
     });
     router.post('/api/saveRecipe', async (req, res) => {
 

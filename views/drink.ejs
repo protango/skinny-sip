@@ -121,8 +121,8 @@
                             <% for (let i = 0; i<nutrition.ingredients.length; i++) { let ing = nutrition.ingredients[i]; %>
                                 <tr>
                                     <td><img class="ingImg" src="<%= ing.photo.thumb %>" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
-                                    <td><a href="/Ingredient?ingredient=<%=og_recipe[i].ingredient%>"><%= toTitleCase(ing.food_name) %></a></td>
-                                    <td data-qty="<%= Math.round(ing.serving_qty*100)/100 %>" data-unit="<%= ing.serving_unit %>">
+                                    <td class="ingredientCell" data-ing="<%=og_recipe[i].ingredient%>"><a href="/Ingredient?ingredient=<%=og_recipe[i].ingredient%>"><%= toTitleCase(ing.food_name) %></a></td>
+                                    <td class="measureCell" data-qty="<%= Math.round(ing.serving_qty*100)/100 %>" data-unit="<%= ing.serving_unit %>">
                                         <span class="mr-3">
                                             <%= Math.round(ing.serving_qty*100)/100 %> <%= ing.serving_unit %>
                                             <% if (ing.serving_qty_metric && ing.serving_unit_metric) { %>

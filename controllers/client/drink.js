@@ -1,8 +1,13 @@
-if ($("div.edited").length) {
-    $("#editButtons").show();
-}
-
 $("i.editBtn").on("click", (e)=> {
+    for (let cellElem of $("td.ingredientCell")) {
+        let cell = $(cellElem);
+        let ingredientName = cell.attr("data-ing");
+        cell.html(`<select value="${ingredientName}"></select>`);
+    }
+
+
+
+    return;
     let target = $(e.target);
     let textBox = target.prev();
     let cell = textBox.parent();

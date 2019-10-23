@@ -13,8 +13,8 @@ function commentApi(router) {
         let drinkId = Number(req.body.drinkId || 0);
 
         if (isNaN(Number(drinkId))) throw new Error("Invalid Id");
-        if (comment == "") throw new Error("Empty Comment");
-        if (username == "") throw new Error("Must Be Logged In");
+        if (!comment) throw new Error("Empty Comment");
+        if (!username) throw new Error("Must Be Logged In");
 
         let result = await sql.query`DECLARE @userId INT = 0
 
