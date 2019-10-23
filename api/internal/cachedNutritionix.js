@@ -193,7 +193,6 @@ function handleNutritionixError(response, recipe) {
 
     if (recipe[badIdx].edited) throw new Error("Invalid edit to ingredient");
     
-    ingredientMap.needsReplacement(recipe[badIdx].ingredient);
     throw {needsSubstitute: recipe[badIdx].ingredient}; // will redirect to the find substitute page
 }
 

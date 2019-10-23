@@ -2,6 +2,8 @@ const fs = require('fs');
 const request = require('request-promise-native');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 const mappings = JSON.parse(fs.readFileSync(__dirname + '/../../config/unknownIngredientsMap.json'));
+const sql = require('mssql');
+const cachedNutritionix = require('./cachedNutritionix');
 
 module.exports = {
     /**
@@ -27,8 +29,15 @@ module.exports = {
         substitute = substitute.toLowerCase();
 
         // test that this ingredient actually needs replacement
-        let existingObj = mappings[ingredient];
-        if (!existingObj || !existingObj.needsReplacement) throw new Error("You are not permitted to perform this action");
+        let unitResult = await sql.query`
+            SELECT TOP(1) ing.id AS ingId, u.symbol, nut.id AS nutId FROM ingredients ing 
+            INNER JOIN units u on ing.unitid = u.id
+            LEFT OUTER JOIN ingredientsNutrition nut ON ing.id = nut.ingredientsid
+            WHERE ing.[name] = ${ingredient}`;
+        if (!unitResult.recordset.length) 
+            throw new Error("Ingredient does not exist");
+        if (unitResult.recordset[0].nutId) 
+            throw new Error("Ingredient does not require substitute");
 
         // test that replacement is valid
         let instantResponse =  await request({
@@ -40,11 +49,38 @@ module.exports = {
         if (!(instantResponse && instantResponse.common && instantResponse.common.length && instantResponse.common.some(x=>x.food_name.toLowerCase() === substitute)))
             throw new Error("Invalid replacement value");
 
-        // save replacement
-        mappings[ingredient] = {replacement: substitute};
-        fs.writeFileSync(__dirname + '/../../config/unknownIngredientsMap.json', JSON.stringify(mappings), function(err) {
-            if(err) throw err;
-        }); 
+        // get replacement nutrition
+        let nutrition = cachedNutritionix([{
+            amount: 100,
+            unit: unitResult.recordset[0].symbol,
+            ingredient: substitute,
+            measure: "100 " + unitResult.recordset[0].symbol
+        }]);
+
+        // save replacement nutrition as if it belonged to the ingredient
+        let ps = new sql.PreparedStatement();
+        ps.input('ingName', sql.VarChar);
+        ps.input('nutritionId', sql.Int);
+        ps.input('amount', sql.Float);
+        await ps.prepare(`
+            INSERT INTO ingredientsNutrition (ingredientsId, nutritionId, amount) 
+            SELECT TOP(1) id, @nutritionId, @amount
+            FROM ingredients where [name] = @ingName AND
+            EXISTS (SELECT * FROM nutritionRef WHERE id = @nutritionId)`);
+        for (let nut in nutrition.foods[i].full_nutrients) {
+            await ps.execute({
+                ingName: ingredient,
+                nutritionId: nut.attr_id,
+                amount: nut.value
+            });
+        }
+
+        let updIngPs = new sql.PreparedStatement();
+        updIngPs.input('srvWeight', sql.Int);
+        updIngPs.input('ingName', sql.VarChar);
+        await updIngPs.prepare(`UPDATE ingredients SET servingWeight=@srvWeight WHERE [name]=@ingName`);
+        updIngPs.execute({srvWeight: nutrition.foods[0].serving_weight_grams, ingName: ingredient});
+        await updIngPs.unprepare();
     },
     /**
      * Flags an ingredient as unknown by nutritionix, this allows it to be replaced through the "save" function.
@@ -52,7 +88,6 @@ module.exports = {
      * @param {*} ingredient The ingredient that needs a replacement
      */
     needsReplacement: function(ingredient) {
-        mappings[ingredient.toLowerCase()] = {needsReplacement: true};
-        fs.writeFileSync(__dirname + '/../../config/unknownIngredientsMap.json', JSON.stringify(mappings));
+
     }
 }
