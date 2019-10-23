@@ -1,7 +1,6 @@
 const request = require('request-promise-native');
 const fs = require('fs');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
-const sql = require('mssql');
 
 /**
  * Builds an object for use by the drinks page EJS template
@@ -11,42 +10,46 @@ async function drinkServerController(query) {
     let id = Number(query.id);
     if (isNaN(Number(id))) throw new Error("Invalid Id");
 
-    let result = await sql.query`SELECT r.id, r.name as cocktailName, u.username, r.category, r.instructions, r.imageURL, i.name AS ingredientName, ri.amount, un.symbol
-    FROM dbo.recipes r
-    INNER JOIN dbo.recipeIngredients ri on r.id = ri.recipesId
-    INNER JOIN dbo.ingredients i on i.id = ri.ingredientsId
-    INNER JOIN dbo.units un on un.id = i.unitId
-    LEFT JOIN dbo.users u on u.id = r.userId
-    WHERE r.id = ${id}`;
+    var drink = await request({
+        uri: 'https://www.thecocktaildb.com/api/json/v1/'+apiKeys.cocktailDB+'/lookup.php',
+        qs: {i: id },
+        json: true
+    });
 
-    if (result.recordset.length > 0){
-        recipeResult = result.recordset.map(x=>{return {
-                    name: x.cocktailName,
-                    id: x.id,
-                    desc: x.category,
-                    method: x.instructions,
-                    img: x.imageURL,
-                    tags: x.username ? [x.username] : [],
-                    glass: ''
-        }})[0];
+    if (!drink.drinks) throw new Error("Problem with the Cocktail DB API");
+    if (!drink.drinks.length) throw new Error("Invalid Id");
+    drink = drink.drinks[0];
 
-        ingredientsResult = result.recordset.map(x=>{return {
-            ingredient: x.ingredientName,
-            measure: x.amount + '' + x.symbol
-        }});
+    var recipe = [];
+    for (let i = 1; i<=15; i++) {
+        let ing = {
+            ingredient: drink["strIngredient"+i] ? drink["strIngredient"+i].trim() : null,
+            measure: drink["strMeasure"+i] ? drink["strMeasure"+i].trim() : null
+        };
+        if (ing.ingredient) {
+            //apply user edits (if any)
+            let nQty = Number(query["ingEditQty"+i]), nUnit = query["ingEditUnit"+i];
+            if (!isNaN(nQty) && nUnit) {
+                ing.measure = nQty + " " + nUnit
+                ing.edited = true;
+            }
+            // default to 1 serving qty
+            if (!ing.measure) ing.measure = "1 Serving";
+            recipe.push(ing);
+        }
     }
 
     result = {
-        name: recipeResult.name,
-        id: recipeResult.id,
-        desc: recipeResult.desc,
-        method: recipeResult.method,
-        img: recipeResult.img,
-        tags: recipeResult.tags,
-        glass: '',
-        nutrition: await require("../../api/internal/nutrition")(ingredientsResult, recipeResult.name),
-        og_recipe: ingredientsResult
-    };
+        name: drink.strDrink,
+        id: drink.idDrink,
+        desc: drink.strCategory,
+        img: drink.strDrinkThumb,
+        tags: drink.strTags ? drink.strTags.split(",").map(x=>x.replace(/([a-z])([A-Z])/g, "$1 $2")) : [],
+        glass: drink.strGlass,
+        method: drink.strInstructions,
+        nutrition: await require("../../api/internal/nutrition")(recipe, drink.strDrink),
+        og_recipe: recipe
+    }
 
     return result;
 }
