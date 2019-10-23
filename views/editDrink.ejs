@@ -4,15 +4,16 @@
 
         <!-- Page Specific JS + CSS  -->
         <link rel="stylesheet" type="text/css" href="/css/drink.css">
-        <title>Skinny Sip - Drink</title>
+        <link rel="stylesheet" type="text/css" href="/css/editDrink.css">
+        <title>Skinny Sip - Edit</title>
     </head>
     <body>
         <% include includes/header.ejs %>
 
         <!-- Body -->
         <div class="container" id="resultContainer">
-            <h1><%= name %></h1>
-            <i><%= desc %></i>
+            <h1><input type="text" class="form-control titleEdit" value="<%= name %>" placeholder="Title"></h1>
+            <input type="text" class="form-control categoryEdit" value="<%= desc %>" placeholder="Category">
             <% for (var tag of tags) {%><span class='badge badge-secondary ml-1'><%=tag%></span><%}%>
             <div class="d-flex mt-3">
                 <div class="photoCard">
@@ -96,87 +97,53 @@
                     </table>
                 </div>
                 <div class="recipeCard">
-                    <h3>Ingredients<a href="/Edit?id=<%=id%>"><i class="fas fa-edit editBtn ml-3" title="Edit this recipe"></i></a></h3>
-                    <form action="/Drink" method="GET" id="ingEditForm">
-                        <table class="table ingredients">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Name</th>
-                                    <th>Amount</th>
-                                    <th>Energy (kJ)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            <%
-                                function toTitleCase(str) {
-                                    return str.replace(
-                                        /\w\S*/g,
-                                        function(txt) {
-                                            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-                                        }
-                                    );
-                                }
-                            %>
-                            <% for (let i = 0; i<nutrition.ingredients.length; i++) { let ing = nutrition.ingredients[i]; %>
-                                <tr>
-                                    <td><img class="ingImg" src="<%= ing.photo.thumb %>" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
-                                    <td class="ingredientCell" data-ing="<%=og_recipe[i].ingredient%>"><a href="/Ingredient?ingredient=<%=og_recipe[i].ingredient%>"><%= toTitleCase(ing.food_name) %></a></td>
-                                    <td class="measureCell" data-qty="<%= Math.round(ing.serving_qty*100)/100 %>" data-unit="<%= ing.serving_unit %>">
-                                        <span class="mr-3">
-                                            <%= Math.round(ing.serving_qty*100)/100 %> <%= ing.serving_unit %>
-                                            <% if (ing.serving_qty_metric && ing.serving_unit_metric) { %>
-                                                <br />(<%= ing.serving_qty_metric %> <%= ing.serving_unit_metric %>)
-                                            <% } %>
-                                        </span>
-                                        <% if (ing.edited) {%>
-                                            <div class="edited"><i class="fas fa-exclamation-circle"></i><span>Edited</span></div>
-                                            <input type="hidden" name="ingEditQty<%=i+1%>" value="<%= ing.serving_qty %>" />
-                                            <input type="hidden" name="ingEditUnit<%=i+1%>" value="<%= ing.serving_unit %>" />
-                                        <%}%>
-                                    </td>
-                                    <td><%= ing.nf_energy %> kJ</td>
-                                </tr>
-                            <% } %>
-                            </tbody>
-                        </table>
-                        <div id="editButtons" class="text-right">
-                            <input type="hidden" name="id" value="<%= id %>" />
-                            <a class="btn btn-secondary" href="/Drink?id=<%= id %>">Cancel Changes</a>
-                            <input type="submit" class="btn btn-primary" value="Update Nutrition" />
-                        </div>
-                    </form>
-                    <h3>Method</h3>
-                    <p><%= method %></p>
-                    <form action="/api/comment" method="POST" id="commentForm">
-                        <table class="commentsTable">                        
-                            <h3>Comments</h3>
-                            <tbody>
-                            <% for (let i = 0; i<comments.length; i++) { let comment = comments[i]; %>
+                    <h3>Ingredients</h3>
+                    <table class="table ingredients">
+                        <thead>
                             <tr>
-                                <td class="comment">	
-                                        <%= comment.text %>                          
-                                </td>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Amount</th>
+                                <th>Energy (kJ)</th>
+                                <th></th>
                             </tr>
-                            <tr>
-                                    <td class="username">	
-                                            <%= comment.username %>                            
-                                    </td>
-                            </tr>
-                            <% } %>
-                            </tbody>
-                        </table>
-                        <input name="drinkId" id="drinkId" type="hidden" value="<%= id %>">
-                        <textarea class="addCommentBox form-control" type="text" name="comment"></textarea>
-                        <button class="btn-primary btn addCommentButton" type="submit">Add Comment</button>
-                        <script>
-                            let elem = $("li.nav-item a[href='/Login']");
-                            if (elem.html() === "Login") {
-                                $(".addCommentButton").attr("disabled", true);
-                                $(".addCommentButton").html("Log in to comment");
+                        </thead>
+                        <tbody>
+                        <%
+                            function toTitleCase(str) {
+                                return str.replace(
+                                    /\w\S*/g,
+                                    function(txt) {
+                                        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                                    }
+                                );
                             }
-                        </script>
-                    </form>
+                        %>
+                        <% for (let i = 0; i<nutrition.ingredients.length; i++) { let ing = nutrition.ingredients[i]; %>
+                            <tr class="ingredientRow">
+                                <td><img class="ingImg" src="<%= ing.photo.thumb %>" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
+                                <td class="ingredientCell" data-ing="<%=og_recipe[i].ingredient%>">
+                                    <input type="text" class="form-control ingredientEdit" value="<%= toTitleCase(ing.food_name) %>">
+                                </td>
+                                <td class="measureCell" data-qty="<%= Math.round(ing.serving_qty*100)/100 %>" data-unit="<%= ing.serving_unit %>">
+                                    <input type="number" class="form-control qtyEdit" value="<%= Math.round(ing.serving_qty*100)/100 %>" min="0.1" step="0.1" max="10000">
+                                    <span>
+                                        <%= ing.serving_unit %>
+                                    </span>
+                                </td>
+                                <td><%= ing.nf_energy %> kJ</td>
+                                <td><i class="fas fa-times btnDeleteIngredient"></i></td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                    <div id="editButtons" class="text-right">
+                        <input type="hidden" name="id" value="<%= id %>" />
+                        <a class="btn btn-secondary" href="/Drink?id=<%= id %>">Cancel Changes</a>
+                        <input type="submit" class="btn btn-primary" value="Update Nutrition" />
+                    </div>
+                    <h3>Method</h3>
+                    <textarea class="form-control"><%= method %></textarea>
                 </div>                
             </div>
             <div class="row mt-5"></div>
@@ -204,6 +171,7 @@
                 </div>
             </div>
         </footer>
-        <script src="/controllers/drink.js"></script>
+        <script>var locals = <%-JSON.stringify(locals)%>;</script>
+        <script src="/controllers/editDrink.js"></script>
     </body>
 </html>

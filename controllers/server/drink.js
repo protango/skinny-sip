@@ -54,7 +54,7 @@ async function drinkServerController(query) {
         }});        
     }
 
-    result = {
+    return {
         name: recipeResult.name,
         id: recipeResult.id,
         desc: recipeResult.desc,
@@ -66,8 +66,6 @@ async function drinkServerController(query) {
         comments : commentResult,
         og_recipe: ingredientsResult
     };
-
-    return result;
 }
 
 module.exports = drinkServerController;

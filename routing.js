@@ -43,6 +43,17 @@ router.get('/Drink', async (req, res) => {
   }
 });
 
+// edit route
+router.get('/Edit', async (req, res) => {
+  userManager.refreshAuth(req, res);
+  try {
+    res.render("editDrink", await require("./controllers/server/editDrink")(req.query));
+  } catch(e) {
+    console.log(e);
+    res.redirect(302, '/Error?error='+e.message);
+  }
+});
+
 // error route
 router.get('/Error', async (req, res) => {
   userManager.refreshAuth(req, res);

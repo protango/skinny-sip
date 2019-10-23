@@ -174,10 +174,6 @@ p.desc {
     display: none;
 }
 
-.table.ingredients input {
-    width: 64px;
-}
-
 .edited {
     color: red;
     margin-top: 5px;
