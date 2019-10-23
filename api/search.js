@@ -21,6 +21,9 @@ function searchApi(router) {
                             img: x.imageURL,
                             tags: x.username ? [x.username] : []
                         }});
+            } else {
+                res.send([]);
+                return;
             }
             res.send(result);
         } else {
