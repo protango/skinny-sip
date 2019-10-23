@@ -32,7 +32,7 @@ async function drinkServerController(query) {
 
         ingredientsResult = result.recordset.map(x=>{return {
             ingredient: x.ingredientName,
-            measure: x.amount + '' + x.symbol
+            measure: x.amount + ' ' + x.symbol
         }});
     }
 
