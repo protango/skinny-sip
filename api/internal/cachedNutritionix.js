@@ -24,7 +24,7 @@ async function cachedNutritionix(recipe) {
     let ps = new sql.PreparedStatement();
     ps.input('ingName', sql.VarChar)
     await ps.prepare(`
-    SELECT ing.[name], ing.imageURL, u.symbol, nut.[nutritionId], nut.amount, ref.[name] AS nutrientName, ref.usdaTag
+    SELECT ing.[name], ing.imageURL, ing.servingWeight, u.symbol, nut.[nutritionId], nut.amount, ref.[name] AS nutrientName, ref.usdaTag
     FROM ingredients ing 
     INNER JOIN units u on u.id = ing.unitid
     LEFT OUTER JOIN ingredientsNutrition nut ON nut.ingredientsId = ing.id 
@@ -59,6 +59,7 @@ async function cachedNutritionix(recipe) {
                 food_name: line.ingredient,
                 serving_qty: 100,
                 serving_unit: res.recordset[0].symbol,
+                serving_weight_grams: res.recordset[0].servingWeight || 0,
                 nf_calories: getByUsdaTag(res.recordset, "ENERC_KCAL"),
                 nf_total_fat: getByUsdaTag(res.recordset, "FAT"),
                 nf_saturated_fat: getByUsdaTag(res.recordset, "FASAT"),
@@ -84,7 +85,7 @@ async function cachedNutritionix(recipe) {
     // handle unknown ingredients
     if (unknownIngredients.length) {
         let nlpRecipe = unknownIngredients.map(x=>
-            "100" + x.unit + " " +x.ingredient
+            "100 " + x.unit + " " +x.ingredient
         ).join("\n");
         // get nutritionix response
         let response = {};
@@ -105,22 +106,30 @@ async function cachedNutritionix(recipe) {
             } else throw e;
         }
         if (response.errors && response.errors.length) {
-            handleNutritionixError(response, unknownLines);
+            handleNutritionixError(response, unknownIngredients);
         } else {
             ps = new sql.PreparedStatement();
             ps.input('ingName', sql.VarChar);
             ps.input('nutritionId', sql.Int);
             ps.input('amount', sql.Float);
             await ps.prepare(`
-                INSERT INTO ingredientsNutrition (ingredientsId, nutritionId, amount) VALUES (
-                    (SELECT TOP(1) id FROM ingredients where [name] = @ingName),
-                    @nutritionId,
-                    @amount
-                )`);
+                INSERT INTO ingredientsNutrition (ingredientsId, nutritionId, amount) 
+                SELECT TOP(1) id, @nutritionId, @amount
+                FROM ingredients where [name] = @ingName AND
+                EXISTS (SELECT * FROM nutritionRef WHERE id = @nutritionId)`);
+            let updIngPs = new sql.PreparedStatement();
+            updIngPs.input('url', sql.VarChar);
+            updIngPs.input('srvWeight', sql.Int);
+            updIngPs.input('ingName', sql.VarChar);
+            await updIngPs.prepare(`UPDATE ingredients SET imageURL=@url, servingWeight=@srvWeight WHERE [name]=@ingName`);
 
             for (let i = 0; i < response.foods.length; i++) {
                 // add image to DB
-                await sql.query`UPDATE ingredients SET imageURL=${response.foods[i].photo.thumb} WHERE [name]=${unknownIngredients[i].ingredient}`;
+                await updIngPs.execute({
+                    url: response.foods[i].photo.thumb, 
+                    ingName: unknownIngredients[i].ingredient,
+                    srvWeight: response.foods[i].serving_weight_grams
+                });
                 // put nutrition on local copy of recipe
                 unknownIngredients[i].nutrition = response.foods[i];
                 // save nutrition to DB
@@ -133,6 +142,7 @@ async function cachedNutritionix(recipe) {
                 }
             }
             await ps.unprepare();
+            await updIngPs.unprepare();
         }
     }
 
