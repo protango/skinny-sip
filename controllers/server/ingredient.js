@@ -1,5 +1,6 @@
 const request = require('request-promise-native');
 const fs = require('fs');
+const sql = require('mssql');
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 
 /**
@@ -13,34 +14,22 @@ async function ingredientServerController(query) {
     let ingSubName = null;
     let ingDescription = null;
 
-    var ingsResponse = await request({
-        uri: 'https://www.thecocktaildb.com/api/json/v1/'+apiKeys.cocktailDB+'/search.php',
-        qs: {i: query.ingredient },
-        json: true
-    });
-
-    if (ingsResponse && ingsResponse.ingredients && ingsResponse.ingredients.length) {
-        var ingResponse = await request({
-            uri: 'https://www.thecocktaildb.com/api/json/v1/'+apiKeys.cocktailDB+'/lookup.php',
-            qs: {iid: ingsResponse.ingredients[0].idIngredient },
-            json: true
-        });
-        if (ingResponse && ingResponse.ingredients && ingResponse.ingredients.length) {
-            let ing = ingResponse.ingredients[0];
-            ingName = ing.strIngredient;
-            ingDescription = ing.strDescription;
-            ingSubName = ing.strType;
-        }
-    }
-
     let drinks = [];
-    var drinksResponse = await request({
-        uri: 'https://www.thecocktaildb.com/api/json/v1/'+apiKeys.cocktailDB+'/filter.php',
-        qs: {i: ingName },
-        json: true
-    });
-    if (drinksResponse&&drinksResponse.drinks&&drinksResponse.drinks.length)
-        drinks = drinksResponse.drinks
+
+    let result = await sql.query`
+    SELECT r.id, r.name AS cocktailName, r.imageURL 
+    FROM dbo.ingredients i
+    INNER JOIN dbo.recipeIngredients ri ON i.Id = ri.ingredientsId
+    INNER JOIN dbo.recipes r ON r.Id = ri.recipesId
+    WHERE i.name = ${ingName}`;
+
+    if (result.recordset.length > 0){
+        drinks = result.recordset.map(x=>{return {
+            idDrink: x.id,
+            strDrink: x.cocktailName,
+            strDrinkThumb: x.imageURL
+        }});
+    }
 
     return {
         ingredient: ingName,
