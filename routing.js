@@ -114,6 +114,7 @@ require("./api/search")(router);
 require("./api/random")(router);
 require("./api/substitute")(router);
 require("./api/login")(router);
+require("./api/comment")(router);
 require("./api/register")(router);
 
 // Expose images

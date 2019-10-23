@@ -185,23 +185,13 @@ p.desc {
 }
 
 .commentsTable {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 14px;
-    font-family: 'Roboto', sans-serif;
     border-spacing: 0;
     width: 100%;
 }
 .commentsTable .comment {
     font-weight: 700;
-    font-size: 13px;
-    line-height: 13px;
-    border-top: 1px solid black;
-}
-.commentsTable .comment {
-    font-weight: 700;
-    font-size: 13px;
-    line-height: 13px;
+    font-size: 11px;
+    line-height: 15px;
     border-top: 1px solid black;
 }
 .commentsTable .username {

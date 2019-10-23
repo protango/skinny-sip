@@ -149,7 +149,7 @@
                     </form>
                     <h3>Method</h3>
                     <p><%= method %></p>
-                    <form action="/api/comment" method="PUT" id="ingEditForm">
+                    <form action="/api/comment" method="POST" id="commentForm">
                         <table class="commentsTable">                        
                             <h3>Comments</h3>
                             <tbody>
@@ -167,6 +167,7 @@
                             <% } %>
                             </tbody>
                         </table>
+                        <input name="drinkId" id="drinkId" type="hidden" value="<%= id %>">
                         <textarea class="addCommentBox form-control" type="text" name="comment"></textarea>
                         <button class="btn-primary btn addCommentButton" type="submit">Add Comment</button>
                         <script>
