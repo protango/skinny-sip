@@ -1,4 +1,5 @@
 const request = require('request-promise-native');
+const sql = require('mssql');
 
 /**
  * Binds API endpoints to the router related to getting search results
@@ -10,20 +11,27 @@ function searchApi(router) {
         let result = [];
         let text = req.params.text;
         if (text.length >= 1) {
-            let body =  await request({
-                uri: 'https://www.thecocktaildb.com/api/json/v1/1/search.php',
-                qs: {s: text },
-                json: true
-            });
-            if (body.drinks) 
-                result = body.drinks.map(x=>{return {
-                    name: x.strDrink,
-                    id: x.idDrink,
-                    desc: x.strCategory,
-                    img: x.strDrinkThumb,
-                    tags: x.strTags ? x.strTags.split(",").map(x=>x.replace(/([a-z])([A-Z])/g, "$1 $2")) : []
-                }});
-            res.send(result);
+
+            let result = await sql.query`SELECT * FROM dbo.recipes WHERE name LIKE '%A${text}%'`;
+            console.log(result.output)
+
+            
+
+            //let body =  await request({
+            //    uri: 'https://www.thecocktaildb.com/api/json/v1/1/search.php',
+            //    qs: {s: text },
+            //    json: true
+            //});
+            //if (body.drinks) 
+            //    result = body.drinks.map(x=>{return {
+            //        name: x.strDrink,
+            //        id: x.idDrink,
+            //        desc: x.strCategory,
+            //        img: x.strDrinkThumb,
+            //        tags: x.strTags ? x.strTags.split(",").map(x=>x.replace(/([a-z])([A-Z])/g, "$1 $2")) : []
+            //    }});
+
+            //res.send(result);
         } else {
             res.send([]);
         }
