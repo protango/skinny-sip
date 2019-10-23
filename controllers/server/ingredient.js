@@ -30,7 +30,6 @@ async function ingredientServerController(query) {
             strDrinkThumb: x.imageURL
         }});
     }
-    http://localhost:8080/Drink?id=
 
     return {
         ingredient: ingName,
