@@ -39,6 +39,20 @@ async function drinkServerController(query) {
         }});
     }
 
+    result = await sql.query`Select c.text, u.username
+    From dbo.recipes r
+    Inner Join dbo.recipeComments rc on r.id = rc.recipesId
+    Inner Join dbo.comments c on c.id = rc.commentId
+    Inner Join dbo.users u on u.id = c.userId 
+    WHERE r.id = ${id}`;
+
+    if (result.recordset.length > 0){
+        commentResult = result.recordset.map(x=>{return {
+                    username: x.username,
+                    text: x.text
+        }});        
+    }
+
     result = {
         name: recipeResult.name,
         id: recipeResult.id,
@@ -48,6 +62,7 @@ async function drinkServerController(query) {
         tags: recipeResult.tags,
         glass: '',
         nutrition: await require("../../api/internal/nutrition")(ingredientsResult, recipeResult.name),
+        comments : commentResult,
         og_recipe: ingredientsResult
     };
 

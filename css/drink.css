@@ -183,3 +183,41 @@ p.desc {
     margin-top: 5px;
     font-size: 12px;
 }
+
+.commentsTable {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+    font-family: 'Roboto', sans-serif;
+    border-spacing: 0;
+    width: 100%;
+}
+.commentsTable .comment {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 13px;
+    border-top: 1px solid black;
+}
+.commentsTable .comment {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 13px;
+    border-top: 1px solid black;
+}
+.commentsTable .username {
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 15px;
+    text-align: right;
+    border-bottom: 1px solid black;
+    font-family: 'Roboto', sans-serif;
+}
+.addCommentBox{
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+.addCommentButton {
+    float: right;
+}
