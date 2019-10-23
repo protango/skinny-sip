@@ -132,6 +132,7 @@ async function cachedNutritionix(recipe) {
                 });
                 // put nutrition on local copy of recipe
                 unknownIngredients[i].nutrition = response.foods[i];
+                unknownIngredients[i].nutrition.serving_unit = unknownIngredients[i].unit;
                 // save nutrition to DB
                 for (let nut of response.foods[i].full_nutrients) {
                     await ps.execute({
@@ -145,6 +146,8 @@ async function cachedNutritionix(recipe) {
             await updIngPs.unprepare();
         }
     }
+
+    if (unknownIngredients.length === 0) console.log("100% Cached Request!");
 
     // OK so by this point everything should be set up
     // scale nutrition values

@@ -116,6 +116,7 @@ require("./api/substitute")(router);
 require("./api/login")(router);
 require("./api/comment")(router);
 require("./api/register")(router);
+require("./api/instantEditing")(router);
 
 // Expose images
 router.use('/img', express.static(__dirname + '/img/'));

@@ -96,7 +96,7 @@
                     </table>
                 </div>
                 <div class="recipeCard">
-                    <h3>Ingredients</h3>
+                    <h3>Ingredients<i class="fas fa-edit editBtn ml-3" title="Edit this recipe"></i></h3>
                     <form action="/Drink" method="GET" id="ingEditForm">
                         <table class="table ingredients">
                             <thead>
@@ -129,7 +129,6 @@
                                                 <br />(<%= ing.serving_qty_metric %> <%= ing.serving_unit_metric %>)
                                             <% } %>
                                         </span>
-                                        <i class="fas fa-edit editBtn"></i>
                                         <% if (ing.edited) {%>
                                             <div class="edited"><i class="fas fa-exclamation-circle"></i><span>Edited</span></div>
                                             <input type="hidden" name="ingEditQty<%=i+1%>" value="<%= ing.serving_qty %>" />
