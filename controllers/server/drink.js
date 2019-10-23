@@ -11,7 +11,7 @@ async function drinkServerController(query) {
     let id = Number(query.id);
     if (isNaN(Number(id))) throw new Error("Invalid Id");
 
-    let result = await sql.query`SELECT r.id, r.name as cocktailName, u.username, r.category, r.instructions, r.imageURL, i.name AS ingredientName, ri.amount, un.symbol
+    let result = await sql.query`SELECT r.id, r.name as cocktailName, u.username, r.category, r.instructions, r.imageURL, i.name AS ingredientName, ri.amount, un.symbol, i.id AS ingredientID
     FROM dbo.recipes r
     INNER JOIN dbo.recipeIngredients ri on r.id = ri.recipesId
     INNER JOIN dbo.ingredients i on i.id = ri.ingredientsId
@@ -31,6 +31,9 @@ async function drinkServerController(query) {
         }})[0];
 
         ingredientsResult = result.recordset.map(x=>{return {
+            ingredientID: x.ingredientID,
+            amount: x.amount,
+            unit: x.symbol,
             ingredient: x.ingredientName,
             measure: x.amount + ' ' + x.symbol
         }});

@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const request = require('request-promise-native');
 const cloneDeep = require('clone-deep');
 const ingredientMap = require('./ingredientMap');
+const sql = require('mssql');
 
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 const cache = JSON.parse(fs.readFileSync(__dirname + '/../../config/nutritionixCache.json'));
@@ -18,50 +19,72 @@ async function cachedNutritionix(recipe) {
     let unknownLines = [];
     let simResponse = {foods: []};
     recipe = cloneDeep(recipe); // clone to not pollute calling scope
+
+    // ingredient prepared statement
+    let ps = new sql.PreparedStatement();
+    ps.input('ingName', sql.VarChar)
+    await ps.prepare(`
+    SELECT ing.[name], ing.imageURL, u.symbol, nut.[nutritionId], nut.amount, ref.[name] AS nutrientName, ref.usdaTag
+    FROM ingredients ing 
+    INNER JOIN units u on u.id = ing.unitid
+    LEFT OUTER JOIN ingredientsNutrition nut ON nut.ingredientsId = ing.id 
+    LEFT OUTER JOIN nutritionRef ref ON nut.nutritionid = ref.id
+    WHERE ing.[name] = @ingName`);
+
+    let unknownIngredients = [];
+
     for (let line of recipe) {
-        let matches = null, qty = null, unit = null, cacheKey = null;
-        if (matches = line.measure.match(/(\d+ )?(\d+)\/(\d+)\s+([^\d]+)\s*$/i)) {
-            qty = (Number(matches[1]) || 0) + (Number(matches[2]) / Number(matches[3]));
-            unit = matches[4];
-        } else if (matches = line.measure.match(/(\d+(?:\.\d+)?)\s+([^\d]+)\s*$/i)) {
-            qty = Number(matches[1]);
-            unit = matches[2];
-        } 
-        if (qty && unit) { // translate common things to oz
-            line.qty = qty;
-            line.unit = unit;
-            let unitTranslation = null;
-            if (unit === "cups" || unit === "shots") unit = unit.substring(0, unit.length - 1);
-            if (unit === "fl oz") unitTranslation = {og_unit: unit, unit: "oz", scaleFactor: 1/1.040843};
-            else if (unit === "shot") unitTranslation = {og_unit: unit, unit: "oz", scaleFactor: 1.5};
-            else if (unit === "ml" || unit === "mL") unitTranslation = {og_unit: unit, unit: "oz", scaleFactor: 0.033814};
-            if (unitTranslation) {
-                line.unitTranslation = unitTranslation;
-                qty *= unitTranslation.scaleFactor;
-                unit = unitTranslation.unit;
-                line.qty = qty;
-                line.unit = unit;
-            }
+        let res = await ps.execute({ingName: line.ingredient});
+        if (!res.recordset.length) {
+            // Ingredient doesn't exist. Create it.
+            let unitResult = await sql.query`SELECT id FROM units WHERE symbol = ${line.unit}`;
+            if (!unitResult.recordset.length) 
+                throw new Error("Invalid unit");
+            let unitId = unitResult.recordset[0].id;
+            await sql.query`INSERT INTO ingredients ([name], unitId) VALUES (${line.ingredient}, ${unitId})`;
+            // requery new ingredient
+            res = await ps.execute({ingName: line.ingredient});
         }
-
-        if (qty && unit) cacheKey = JSON.stringify({u: unit, i: line.ingredient.toLowerCase()});
-        else cacheKey = JSON.stringify({m: line.measure, i: line.ingredient.toLowerCase()});
-
-        let cacheMatch = cache[cacheKey];
-        if (cacheMatch) {
-            cacheMatch = cloneDeep(cacheMatch); // clone to not pollute cache
-            if (qty && unit) {
-                let scale = 1/cacheMatch.serving_qty*qty;
-                cacheMatch = scaleNutritionObj(cacheMatch, scale);
-            }
-            simResponse.foods.push(cacheMatch);
+        if (!res.recordset[0].nutritionId) {
+            // Ingredient exists but no nutrition info
+            unknownIngredients.push(line);
         } else {
-            unknownLines.push(Object.assign({cacheKey: cacheKey, lineNo: recipe.indexOf(line)}, line));
+            // Everything went fine
+            function getByUsdaTag(recordset, tag) {
+                let f = recordset.find(x=>x.usdaTag === tag);
+                if (!f) return 0;
+                else return f.amount;
+            }
+            line.nutrition = {
+                food_name: line.ingredient,
+                serving_qty: 100,
+                serving_unit: res.recordset[0].symbol,
+                nf_calories: getByUsdaTag(res.recordset, "ENERC_KCAL"),
+                nf_total_fat: getByUsdaTag(res.recordset, "FAT"),
+                nf_saturated_fat: getByUsdaTag(res.recordset, "FASAT"),
+                nf_cholesterol: getByUsdaTag(res.recordset, "CHOLE"),
+                nf_sodium: getByUsdaTag(res.recordset, "NA"),
+                nf_total_carbohydrate: getByUsdaTag(res.recordset, "CHOCDF"),
+                nf_dietary_fiber: getByUsdaTag(res.recordset, "FIBTG"),
+                nf_sugars: getByUsdaTag(res.recordset, "SUGAR"),
+                nf_protein: getByUsdaTag(res.recordset, "PROCNT"),
+                nf_potassium: getByUsdaTag(res.recordset, "K"),
+                full_nutrients: res.recordset.map(x=>{return{
+                    attr_id: x.nutritionId,
+                    value: x.amount
+                }}),
+                photo: {
+                    thumb: res.recordset[0].imageURL
+                }
+            }
         }
     }
-    if (unknownLines.length) {
-        let nlpRecipe = unknownLines.map(x=>
-            (x.qty && x.unit ? "100 " + x.unit : x.measure) +" "+x.ingredient
+    await ps.unprepare();
+
+    // handle unknown ingredients
+    if (unknownIngredients.length) {
+        let nlpRecipe = unknownIngredients.map(x=>
+            "100" + x.unit + " " +x.ingredient
         ).join("\n");
         // get nutritionix response
         let response = {};
@@ -84,39 +107,43 @@ async function cachedNutritionix(recipe) {
         if (response.errors && response.errors.length) {
             handleNutritionixError(response, unknownLines);
         } else {
-            let cacheKeys = Object.keys(cache);
-            for (let i = 0; i<response.foods.length; i++) {
-                // write to memory cache if there's room
-                if (cacheKeys.length < maxCacheEntries);
-                    cache[unknownLines[i].cacheKey] = cloneDeep(response.foods[i]);
+            ps = new sql.PreparedStatement();
+            ps.input('ingName', sql.VarChar);
+            ps.input('nutritionId', sql.Int);
+            ps.input('amount', sql.Float);
+            await ps.prepare(`
+                INSERT INTO ingredientsNutrition (ingredientsId, nutritionId, amount) VALUES (
+                    (SELECT TOP(1) id FROM ingredients where [name] = @ingName),
+                    @nutritionId,
+                    @amount
+                )`);
 
-                // rescale values if this was a "smart" search
-                if (unknownLines[i].qty && unknownLines[i].unit) {
-                    let scale = 1/response.foods[i].serving_qty*unknownLines[i].qty;
-                    response.foods[i] = scaleNutritionObj(response.foods[i], scale);
+            for (let i = 0; i < response.foods.length; i++) {
+                // add image to DB
+                await sql.query`UPDATE ingredients SET imageURL=${response.foods[i].photo.thumb} WHERE [name]=${unknownIngredients[i].ingredient}`;
+                // put nutrition on local copy of recipe
+                unknownIngredients[i].nutrition = response.foods[i];
+                // save nutrition to DB
+                for (let nut of response.foods[i].full_nutrients) {
+                    await ps.execute({
+                        ingName: unknownIngredients[i].ingredient,
+                        nutritionId: nut.attr_id,
+                        amount: nut.value
+                    });
                 }
-
-                // write to simulated response
-                simResponse.foods.splice(unknownLines[i].lineNo, 0, response.foods[i]);
-
             }
-            // save cache to disk if there's room
-            if (cacheKeys.length < maxCacheEntries);
-                fs.writeFileSync(__dirname + '/../../config/nutritionixCache.json', JSON.stringify(cache), function(err) {
-                    if(err) throw err;
-                });
+            await ps.unprepare();
         }
-    } else {
-        console.log("Just served a 100% cached request!")
     }
 
-    // untranslate values
-    for (let i = 0; i<simResponse.foods.length; i++) {
-        if (!recipe[i].unitTranslation) continue;
-        simResponse.foods[i].serving_unit = recipe[i].unitTranslation.og_unit;
-        simResponse.foods[i].serving_qty /= recipe[i].unitTranslation.scaleFactor;
+    // OK so by this point everything should be set up
+    // scale nutrition values
+    for (let line of recipe) {
+        let scale = 1/line.nutrition.serving_qty*line.amount;
+        scaleNutritionObj(line.nutrition, scale);
     }
-    return simResponse;
+
+    return {foods: recipe.map(x=>x.nutrition)}
 }
 
 /**
