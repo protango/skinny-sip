@@ -162,11 +162,11 @@ p.desc {
     font-weight: 400;
 }
 
-.editBtn {
+.editBtn, h3 i.saveBtn, h3 i.cancelBtn {
     color: #b1b1b1;
     cursor: pointer;
 }
-.editBtn:hover {
+.editBtn:hover, h3 i.saveBtn:hover, h3 i.cancelBtn:hover {
     color: rgb(95, 95, 95);
 }
 

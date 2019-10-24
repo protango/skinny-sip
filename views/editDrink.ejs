@@ -97,7 +97,11 @@
                     </table>
                 </div>
                 <div class="recipeCard">
-                    <h3>Ingredients</h3>
+                    <h3>
+                        Ingredients
+                        <i class="fas fa-history cancelBtn ml-3" title="Cancel changes"></i>
+                        <i class="fas fa-save ml-3 saveBtn" title="Save this recipe"></i>
+                    </h3>
                     <table class="table ingredients">
                         <thead>
                             <tr>
@@ -145,6 +149,14 @@
 
                     <h3>Method</h3>
                     <textarea class="form-control"><%= method %></textarea>
+                    <div class="mt-2">  
+                        <button class="btn btn-secondary cancelBtn" />
+                            <i class="fas fa-history"></i> Cancel all changes
+                        </button>                  
+                        <button class="btn btn-primary saveBtn" />
+                            <i class="fas fa-save"></i> Save Recipe
+                        </button>
+                    </div>
                 </div>                
             </div>
             <div class="row mt-5"></div>
