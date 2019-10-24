@@ -137,11 +137,12 @@
                         <% } %>
                         </tbody>
                     </table>
-                    <div id="editButtons" class="text-right">
-                        <input type="hidden" name="id" value="<%= id %>" />
-                        <a class="btn btn-secondary" href="/Drink?id=<%= id %>">Cancel Changes</a>
-                        <input type="submit" class="btn btn-primary" value="Update Nutrition" />
+                    <div class="mb-5 text-right">                    
+                        <button class="btn btn-primary addIngredient" />
+                            <i class="fas fa-plus"></i> Add Ingredient
+                        </button>
                     </div>
+
                     <h3>Method</h3>
                     <textarea class="form-control"><%= method %></textarea>
                 </div>                

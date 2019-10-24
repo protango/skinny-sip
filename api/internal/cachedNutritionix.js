@@ -1,8 +1,6 @@
 const fs = require('fs');
-const crypto = require('crypto');
 const request = require('request-promise-native');
 const cloneDeep = require('clone-deep');
-const ingredientMap = require('./ingredientMap');
 const sql = require('mssql');
 
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
@@ -13,7 +11,8 @@ const maxCacheEntries = 1000;
 /**
  * Returns the nutrition information for a given recipe object.
  * Will use cache where possible.
- * @param {recipe} recipe The recipe
+ * @param {nutrition.recipeLine[]} recipe The recipe
+ * @returns {{foods: nutritionObj[]}}
  */
 async function cachedNutritionix(recipe) {
     let unknownLines = [];
@@ -200,3 +199,24 @@ function handleNutritionixError(response, recipe) {
 }
 
 module.exports = cachedNutritionix;
+
+ /** 
+ * @typedef {object} nutritionObj
+ * @property {string} food_name
+ * @property {number} serving_qty
+ * @property {string} serving_unit
+ * @property {number} serving_weight_grams
+ * @property {number} nf_calories
+ * @property {number} nf_total_fat
+ * @property {number} nf_saturated_fat
+ * @property {number} nf_cholesterol
+ * @property {number} nf_sodium
+ * @property {number} nf_total_carbohydrate
+ * @property {number} nf_dietary_fiber
+ * @property {number} nf_sugars
+ * @property {number} nf_protein
+ * @property {number} nf_potassium
+ * @property {number} nf_p
+ * @property {{attr_id: number, value: number}[]} full_nutrients
+ * @property {{thumb: string}} photo
+ */

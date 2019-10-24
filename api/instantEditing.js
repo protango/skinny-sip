@@ -1,18 +1,37 @@
+const express = require('express');
 const sql = require('mssql');
+const nutrition = require("./internal/nutrition");
 
 /**
  * Binds API endpoints to the router related to editing recipes
- * @param {Router} router The router object to attach the API to
+ * @param {express.Router} router The router object to attach the API to
  */
 function instantEditingApi(router) {
-    // simply pass through the response from the nutirtionix api to the client, we do this to hide our API key
     router.get('/api/instantIngredient/:text', async (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         let text = req.params.text;
         if (!text || text.length < 3) return [];
         let r = await sql.query`
-            SELECT TOP(10) [name], id from ingredients where [name] LIKE '%${text}%'`;
-        return r.recordset;
+            SELECT TOP(10) [name], id, u.symbol
+            FROM ingredients ing 
+            INNER JOIN units u ON u.id = ing.unitid
+            WHERE ing.[name] LIKE '%${text}%'`;
+        /** @type {instantResult[]} */
+        let result = r.recordset.map(x=>{return {
+            id: x.id,
+            ingredient: x.name,
+            unit: x.symbol
+        }});
+        return result;
+    });
+    router.post('/api/liveNutrition', async (req, res) => {
+        /** @type {nutrition.recipeLine[]} */
+        let inputRecipe = req.body;
+
+        let nutritionResult = await nutrition(inputRecipe);
+
+        /** @type {liveNutritionResult} */
+        let result = {};
     });
     router.post('/api/saveRecipe', async (req, res) => {
 
@@ -20,3 +39,29 @@ function instantEditingApi(router) {
 }
 
 module.exports = instantEditingApi;
+
+/** 
+ * @typedef {object} instantIngredientResult
+ * @property {number} id The ingredient id
+ * @property {string} ingredient The ingredient Name
+ * @property {string} unit The ingredients unit symbol
+ */
+
+ /** 
+ * @typedef {object} liveNutritionResult
+ * @property {number} stdDrinks
+ * @property {number} servingWeight
+ * @property {number} servingsPerPackage
+ * @property {nutritionTableRow[]} mainNutrients
+ * @property {nutritionTableRow[]} microNutrients
+ * @property {number[]} individualEnergies The energy of each individual ingredient, in kJ
+ */
+
+ /** 
+  * @typedef {object} nutritionTableRow
+  * @property {string} name
+  * @property {number} amountPerServing
+  * @property {number} rdiPercent
+  * @property {number} amountPer100g
+  * @property {string} unit
+  */

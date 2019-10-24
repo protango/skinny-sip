@@ -6,17 +6,18 @@ const microNutrients = JSON.parse(fs.readFileSync(__dirname + '/../../config/mic
 
 /**
  * Gets an object containing a drinks aggregate nutrition content, and individual ingredients nutirtion content.
- * @param {recipe} recipe A recipe object for the drink you are querying
+ * @param {recipeLine[]} recipe A recipe object for the drink you are querying
  * @param {string} drinkName The name of the drink you are querying information for
  */
 async function internalNutritionApi(recipe, drinkName) {
     recipe = cloneDeep(recipe);
+    /** @type {{microNutrients: [], ingredients: cachedNutritionix.nutritionObj[], aggregate: cachedNutritionix.nutritionObj}} */
     let result = {microNutrients: microNutrients}; // we send micronutrients to the scope for rendering
     fixUnknownMeasures(recipe); // fix badly formatted measures in cocktail DB
     fixUnknownIngredients(recipe); // re-map known bad ingredients to their known substitute
 
     // get nutritionix response
-    response = await cachedNutritionix(recipe);
+    let response = await cachedNutritionix(recipe);
 
     result.ingredients = response.foods;
     // merge the nutrition data for each ingredient into one aggregate object
@@ -109,7 +110,7 @@ function fixUnknownMeasures(recipe) {
 
 /**
  * Merge individual nutrition objects into one
- * @param {nutirtionObj[]} indivResults individual foods nutrition results
+ * @param {nutritionObj[]} indivResults individual foods nutrition results
  * @param {string} newName the name of the aggregate nutrition object
  */
 function aggregateNutrition(indivResults, newName) {
@@ -146,3 +147,13 @@ function aggregateNutrition(indivResults, newName) {
     result.serving_weight_grams = Math.round(result.serving_weight_grams*100) / 100;
     return result;
 }
+
+/** 
+ * @typedef {object} recipeLine
+ * @property {number} ingredientID
+ * @property {number} amount
+ * @property {string} unit
+ * @property {string} ingredient
+ * @property {string} measure Simply the amount and the unit combined with a space
+ */
+
