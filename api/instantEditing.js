@@ -38,7 +38,7 @@ function instantEditingApi(router) {
     router.post('/api/saveRecipe', async (req, res) => {
         /** @type {{id:number, name:string, category: string, recipe: nutrition.recipeLine[]}} */
         let input = req.body;
-        let userName = userManager.getUsername();
+        let userName = userManager.getUsername(req, res);
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
         // logic here
@@ -53,7 +53,7 @@ function instantEditingApi(router) {
     });
     router.get('/api/deleteRecipe/:id', async (req, res) => {
         let id = Number(req.params.id);
-        let userName = userManager.getUsername();
+        let userName = userManager.getUsername(req, res);
         if (isNaN(id)) throw new Error("Invalid ID");
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
