@@ -4,7 +4,7 @@ const sql = require('mssql');
 const nutrition = require("./internal/nutrition");
 const userManager = require("./internal/userManager");
 const genericImgURL = __dirname + '/../img/genericCocktail.png';
-const microNutrients = JSON.parse(fs.readFileSync(__dirname + '/../../config/micronutrients.json')).microNutrients;
+const microNutrients = JSON.parse(fs.readFileSync(__dirname + '/../config/micronutrients.json')).microNutrients;
 
 
 /**
@@ -31,13 +31,13 @@ function instantEditingApi(router) {
     });
     router.post('/api/liveNutrition', async (req, res) => {
         /** @type {nutrition.recipeLine[]} */
-        let inputRecipe = req.body;
+        let inputRecipe = req.body.recipe;
 
         let ps = new sql.PreparedStatement();
         ps.input('ingName', sql.VarChar)
         await ps.prepare(`SELECT * FROM ingredients WHERE [name]=@ingName`);
         for (let line of inputRecipe) 
-            if (!(await ps.execute({ingName: x.ingredient})).recordset.length) 
+            if (!(await ps.execute({ingName: line.ingredient})).recordset.length) 
                 line.unknown = true;
         await ps.unprepare();
 
@@ -47,8 +47,8 @@ function instantEditingApi(router) {
         let buildNutRow = function(name, value, rdi, unit, subVal) {
             return {
                 name: name.toUpperCase(),
-                amountPerServing: value,
-                rdiPercent: rdi ? Math.round(value / rdi) : null,
+                amountPerServing: Math.round(value*10) / 10,
+                rdiPercent: rdi ? Math.round(value / rdi * 100) : null,
                 amountPer100g: Math.round(value / n.serving_weight_grams * 100 * 10) / 10,
                 unit: unit,
                 subVal: subVal || false

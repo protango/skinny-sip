@@ -1,30 +1,73 @@
-$("i.editBtn").on("click", (e)=> {
-    return;
-    let target = $(e.target);
-    let textBox = target.prev();
-    let cell = textBox.parent();
-    let row = cell.parent();
+async function updateNutrition() {
 
-    let number = Number(cell.attr("data-qty"));
-    let unit = cell.attr("data-unit").toLowerCase();
-    if (unit.includes("fruit ") || unit.includes("lime")) unit = "serving";
-    if (unit.includes("can ")) unit = "can";
+    let recipe = buildRecipe();
+    /** @type {liveNutritionResult} */
+    let nutrition = 
+        await new Promise(resolve=>$.post("/api/liveNutrition", {recipe:recipe}, data=>resolve(data), "json"));
 
-    let allowedUnits = ["serving", "g", "ml", "oz", "fl oz", "cup", "tsp", "tbsp", "pinch", "shot", "dash"];
-    if (!allowedUnits.includes(unit)) allowedUnits.push(unit);
-    allowedUnits = allowedUnits.sort();
+    $(".servPpVal").html(nutrition.servingsPerPackage);
+    $(".servSzVal").html(nutrition.servingWeight+"g");
+    $(".servSzVal").html(nutrition.servingWeight+"g");
+    $(".stdDrinks span").html(nutrition.stdDrinks);
 
-    cell.empty();
-
-    let numberElem = $("<input min='0.1' max='9999' step='0.1' type='number' class='ingEdit' name='ingEditQty"+(row.index()+1)+"' value='"+number+"' />");
-    let unitElem = $("<select name='ingEditUnit"+(row.index()+1)+"'></select>");
-    for (let nUnit of allowedUnits) {
-        let option = $("<option value='"+nUnit+"'"+(nUnit.toLowerCase()===unit ? " selected" : "")+">"+nUnit+"</option>");
-        unitElem.append(option);
+    $("table.nutritionTable .valRow").remove();
+    let microHeaderRow = $("table.nutritionTable .microHeaderRow");
+    let appendixRow = $("table.nutritionTable .appendix");
+    for (let nut of nutrition.mainNutrients) {
+        let elem = $(`
+        <tr class="valRow${nut.subVal?' subVal':''}${(nut.rdiPercent && nut.rdiPercent >= 50) || nut.name==="Alcohol, ethyl"?' yellowHl':''}">
+            <td class="nName">${nut.name}</td>
+            <td class="nQtyPs">${nut.amountPerServing} ${nut.unit}</td>
+            <td class="nDI">${nut.rdiPercent === null ? '-' : nut.rdiPercent === 0 ? '<1%' : nut.rdiPercent+"%"}</td>
+            <td class="nQty100">${nut.amountPer100g} ${nut.unit}</td>
+        </tr>`);
+        elem.insertBefore(microHeaderRow);
+    }
+    for (let nut of nutrition.microNutrients) {
+        if (nut.amountPerServing === 0) continue;
+        let elem = $(`
+        <tr class="valRow micro${nut.subVal?' subVal':''}${(nut.rdiPercent && nut.rdiPercent >= 50) || nut.name==="Alcohol, ethyl"?' yellowHl':''}">
+            <td class="nName">${nut.name}</td>
+            <td class="nQtyPs">${nut.amountPerServing} ${nut.unit}</td>
+            <td class="nDI">${nut.rdiPercent === null ? '-' : nut.rdiPercent === 0 ? '<1%' : nut.rdiPercent+"%"}</td>
+            <td class="nQty100">${nut.amountPer100g} ${nut.unit}</td>
+        </tr>`);
+        elem.insertBefore(appendixRow);
     }
 
-    cell.append(numberElem);
-    cell.append(unitElem);
+}
 
-    $("#editButtons").show();
-});
+function buildRecipe() {
+    let lines = [...$(".ingredientRow")];
+    let recipe = lines.map(x=>{
+        let $x = $(x);
+        let result = {
+            ingredient: $x.find(".ingredientEdit").val(),
+            amount: Number($x.find(".qtyEdit").val()),
+            unit: $x.find(".measureCell").attr("data-unit"),
+        };
+        result.measure = result.amount + " " + result.unit;
+        return result;
+    });
+    return recipe;
+}
+
+ /** 
+ * @typedef {object} liveNutritionResult
+ * @property {number} stdDrinks
+ * @property {number} servingWeight
+ * @property {number} servingsPerPackage
+ * @property {nutritionTableRow[]} mainNutrients
+ * @property {nutritionTableRow[]} microNutrients
+ * @property {number[]} individualEnergies The energy of each individual ingredient, in kJ
+ */
+
+  /** 
+  * @typedef {object} nutritionTableRow
+  * @property {string} name
+  * @property {number} amountPerServing
+  * @property {number} rdiPercent
+  * @property {number} amountPer100g
+  * @property {string} unit
+  * @property {bool} subValue
+  */
