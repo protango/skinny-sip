@@ -4,6 +4,8 @@ const sql = require('mssql');
 const nutrition = require("./internal/nutrition");
 const userManager = require("./internal/userManager");
 const genericImgURL = __dirname + '/../img/genericCocktail.png';
+const microNutrients = JSON.parse(fs.readFileSync(__dirname + '/../../config/micronutrients.json')).microNutrients;
+
 
 /**
  * Binds API endpoints to the router related to editing recipes
@@ -32,9 +34,43 @@ function instantEditingApi(router) {
         let inputRecipe = req.body;
 
         let nutritionResult = await nutrition(inputRecipe);
-
+        let n = nutritionResult.aggregate;
+        let alcObj = n.full_nutrients.find(x=>x.attr_id===221);
+        let buildNutRow = function(name, value, rdi, unit, subVal) {
+            return {
+                name: name.toUpperCase(),
+                amountPerServing: value,
+                rdiPercent: rdi ? Math.round(value / rdi) : null,
+                amountPer100g: Math.round(value / n.serving_weight_grams * 100 * 10) / 10,
+                unit: unit,
+                subVal: subVal || false
+            }
+        }
         /** @type {liveNutritionResult} */
-        let result = {};
+        let result = {
+            stdDrinks: alcObj ? Math.round(alcObj.value / 10 * 10) / 10 : 0,
+            servingWeight: n.serving_weight_grams,
+            servingsPerPackage: n.serving_qty,
+            mainNutrients: [
+                buildNutRow("ENERGY", n.nf_calories * 4.184, 8700, "kJ"),
+                buildNutRow("protein", n.nf_protein, 50, "g"),
+                buildNutRow("fat, total", n.nf_total_fat, 70, "g"),
+                buildNutRow("saturated", n.nf_saturated_fat, 24, "g", true),
+                buildNutRow("CARBOHYDRATE", n.nf_total_carbohydrate, 310, "g"),
+                buildNutRow("SUGARS", n.nf_sugars, 90, "g", true),
+                buildNutRow("dietary fibre", n.nf_dietary_fiber, 30, "g"),
+                buildNutRow("sodium", n.nf_sodium, 2300, "mg"),
+                buildNutRow("potassium", n.nf_potassium, 3300, "mg"),
+                buildNutRow("cholestrol", n.nf_cholesterol, 0, "mg")
+            ],
+            microNutrients: n.full_nutrients.map(x => {
+                let match = microNutrients.find(y => y.id === x.attr_id);
+                if (!match) return null;
+                return buildNutRow(match.name, x.value, match.rdi, match.unit);
+            }).filter(x => x),
+            individualEnergies: nutritionResult.ingredients.map(x=>x.nf_calories * 4.184)
+        };
+        res.send(result);
     });
     router.post('/api/createRecipe', async (req, res) => {
         /** @type {{id:number, name:string, category: string, recipe: nutrition.recipeLine[]}} */
@@ -192,4 +228,5 @@ module.exports = instantEditingApi;
   * @property {number} rdiPercent
   * @property {number} amountPer100g
   * @property {string} unit
+  * @property {bool} subValue
   */
