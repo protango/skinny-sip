@@ -44,7 +44,8 @@ async function drinkServerController(query) {
     Inner Join dbo.recipeComments rc on r.id = rc.recipesId
     Inner Join dbo.comments c on c.id = rc.commentId
     Inner Join dbo.users u on u.id = c.userId 
-    WHERE r.id = ${id}`;
+    WHERE r.id = ${id}
+    ORDER BY c.[date] DESC`;
 
     let commentResult = [];
     if (result.recordset.length > 0){
