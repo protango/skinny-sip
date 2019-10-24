@@ -66,12 +66,7 @@ function instantEditingApi(router) {
         let userName = userManager.getUsername(req);
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
-        let drink = input.drinks
-        let ingredients = input.ingredients;
-        let amounts = input.amounts;
-        let units = input.units;
-
-        let r = await sql.query`
+        let recipeUpdate = await sql.query`
             DECLARE @userId INT
 
             SELECT @userId = id
@@ -79,39 +74,51 @@ function instantEditingApi(router) {
             WHERE username = @userName
         
             UPDATE dbo.recipes(name,userId,category,instructions,imageURL) VALUES
-            SET name = ${drink.name}, editedUserId = @userId, category = ${drink.category}, instructions = ${drink.instructions}
-            WHERE id = ${Number(drink.id)}
+            SET name = ${input.name}, editedUserId = @userId, category = ${input.category}, instructions = ${input.method}
+            WHERE id = ${Number(input.id)}
             
             DELETE 
             FROM dbo.recipeIngredients
-            WHERE recipesId = ${Number(drink.id)}`;
+            WHERE recipesId = ${Number(input.id)}`;
 
-        for(let i = 0; i < ingredients.length; i++){
-            if(ingredients[i] != "" && amounts[i] != ""){
-            let r = await sql.query`
+            let ingredientUpdate = new sql.PreparedStatement();
+            ingredientUpdate.input('recipeId', sql.Int)
+            ingredientUpdate.input('ingredientName', sql.VarChar)
+            ingredientUpdate.input('unitSymbol', sql.VarChar)
+            ingredientUpdate.input('ammount', sql.Float)
+
+            await ingredientUpdate.prepare(`
                 DECLARE @ingredientId INT = 0
                 DECLARE @recipeId INT = 0
 
                 SELECT @ingredientId = id
                 FROM dbo.ingredients
-                WHERE name = ${ingredients[i]}
+                WHERE name = @ingredientName
 
                 IF @ingredientId = 0
                 BEGIN
-	                DECLARE @unitId int = 0
+                    DECLARE @unitId int = 0
 
-            	    SELECT @unitId = id
-	                FROM dbo.units
-	                WHERE symbol = ${units[i]}
+                    SELECT @unitId = id
+                    FROM dbo.units
+                    WHERE symbol = @unitSymbol
 
-	                INSERT INTO dbo.ingredients(name, unitId) VALUES
-	                (${ingredients[i]}, @unitId)
+                    INSERT INTO dbo.ingredients(name, unitId) VALUES
+                    (@ingredientName, @unitId)
 
                     SELECT @ingredientId = SCOPE_IDENTITY()
                 END
 
                 INSERT INTO dbo.recipeIngredients(recipesId, ingredientsId, amount) VALUES
-                (${Number(drink.id)},@ingredientId,${Number(amounts[i])})`;
+                (@recipeId,@ingredientId,@ammount)`);
+
+        for(let i = 0; i < input.recipe.length; i++){
+            if(input.recipe[i].ingredient != "" && input.recipe[i].amount != ""){
+            let ingredientUpdate = await ps.execute(
+                {recipeId: input.id},
+                {ingredientName: input.recipe[i].ingredient},
+                {unitSymbol: input.recipe[i].unit},
+                {ammount: input.recipe[i].amount});
             }
         }
 
@@ -129,7 +136,29 @@ function instantEditingApi(router) {
         if (isNaN(id)) throw new Error("Invalid ID");
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
-        // logic here
+        let recipeUpdate = await sql.query`
+            DECLARE @valid INT = 0
+
+            SELECT @valid = COUNT(*)
+            FROM dbo.recipes r
+            INNER JOIN dbo.users u ON r.userId = u.id
+            WHERE u.username = ${userName} 
+            AND r.id = ${id} 
+        
+            IF @valid = 1
+            BEGIN
+                DELETE
+                FROM dbo.recipeComments
+                WHERE recipesId = ${id} 
+        
+                DELETE
+                FROM dbo.recipeIngredients
+                WHERE recipesId = ${id} 
+        
+                DELETE
+                FROM dbo.recipes
+                WHERE id = ${id} 
+            END`;
 
         // send whether delete was successful or not
         res.setHeader('Content-Type', 'application/json');
