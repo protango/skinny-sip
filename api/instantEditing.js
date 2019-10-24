@@ -1,6 +1,8 @@
 const express = require('express');
 const sql = require('mssql');
 const nutrition = require("./internal/nutrition");
+const userManager = require("./internal/userManager");
+
 
 /**
  * Binds API endpoints to the router related to editing recipes
@@ -34,7 +36,32 @@ function instantEditingApi(router) {
         let result = {};
     });
     router.post('/api/saveRecipe', async (req, res) => {
+        /** @type {{id:number, name:string, category: string, recipe: nutrition.recipeLine[]}} */
+        let input = req.body;
+        let userName = userManager.getUsername();
+        if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
+        // logic here
+
+        // send whether save was successful or not
+        res.setHeader('Content-Type', 'application/json');
+        if (1==1) {
+            res.send({success: true});
+        } else {
+            res.send({success: false, reason: "Some error reason"});
+        }
+    });
+    router.get('/api/deleteRecipe/:id', async (req, res) => {
+        let id = Number(req.params.id);
+        let userName = userManager.getUsername();
+        if (isNaN(id)) throw new Error("Invalid ID");
+        if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
+
+        // logic here
+
+        // send whether delete was successful or not
+        res.setHeader('Content-Type', 'application/json');
+        res.send({success: true});
     });
 }
 
