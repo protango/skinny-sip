@@ -207,3 +207,52 @@ p.desc {
 .addCommentButton {
     float: right;
 }
+
+.commentContainer .thumbnail {
+    padding:0px;
+}
+.commentContainer .panel {
+    position:relative;
+    margin-bottom: 20px;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    border-color: #ddd;
+}
+.commentContainer .panel-heading {
+    padding: 10px 15px;
+    border-bottom: 1px solid transparent;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    color: #333;
+    background-color: #f5f5f5;
+    border-color: #ddd;
+}
+.commentContainer .panel-body {
+    padding: 15px;
+    box-sizing: border-box;
+}
+.commentContainer .panel>.panel-heading:after,.panel>.panel-heading:before{
+	position:absolute;
+	top:11px;left:-16px;
+	right:100%;
+	width:0;
+	height:0;
+	display:block;
+	content:" ";
+	border-color:transparent;
+	border-style:solid solid outset;
+	pointer-events:none;
+}
+.commentContainer .panel>.panel-heading:after{
+	border-width:7px;
+	border-right-color:#f7f7f7;
+	margin-top:1px;
+	margin-left:2px;
+}
+.commentContainer .panel>.panel-heading:before{
+	border-right-color:#ddd;
+	border-width:8px;
+}

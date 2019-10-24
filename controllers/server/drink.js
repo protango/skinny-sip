@@ -39,7 +39,7 @@ async function drinkServerController(query) {
         }});
     }
 
-    result = await sql.query`Select c.text, u.username
+    result = await sql.query`Select c.text, u.username, c.[date]
     From dbo.recipes r
     Inner Join dbo.recipeComments rc on r.id = rc.recipesId
     Inner Join dbo.comments c on c.id = rc.commentId
@@ -50,7 +50,8 @@ async function drinkServerController(query) {
     if (result.recordset.length > 0){
         commentResult = result.recordset.map(x=>{return {
                     username: x.username,
-                    text: x.text
+                    text: x.text,
+                    date: x.date
         }});        
     }
 

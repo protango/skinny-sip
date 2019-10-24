@@ -148,24 +148,31 @@
                     </form>
                     <h3>Method</h3>
                     <p><%= method %></p>
+
+                    <h3>Comments</h3>
+                    <% for (let i = 0; i<comments.length; i++) { let comment = comments[i]; %>
+                        <div class="row commentContainer">
+                            <div class="col-sm-2">
+                                <div class="img-thumbnail">
+                                    <img class="img-fluid user-photo" src="https://ssl.gstatic.com/accounts/ui/avatar_2x.png">
+                                </div>
+                            </div>
+
+                            <div class="col-sm-10">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <strong><%= comment.username %></strong> 
+                                        <span class="text-muted">commented <%= Math.round(Math.abs((comment.date - new Date()) / (24 * 60 * 60 * 1000))) %> days ago</span>
+                                    </div>
+                                    <div class="panel-body">
+                                        <%= comment.text %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                    
                     <form action="/api/comment" method="POST" id="commentForm">
-                        <table class="commentsTable">                        
-                            <h3>Comments</h3>
-                            <tbody>
-                            <% for (let i = 0; i<comments.length; i++) { let comment = comments[i]; %>
-                            <tr>
-                                <td class="comment">	
-                                        <%= comment.text %>                          
-                                </td>
-                            </tr>
-                            <tr>
-                                    <td class="username">	
-                                            <%= comment.username %>                            
-                                    </td>
-                            </tr>
-                            <% } %>
-                            </tbody>
-                        </table>
                         <input name="drinkId" id="drinkId" type="hidden" value="<%= id %>">
                         <textarea class="addCommentBox form-control" type="text" name="comment"></textarea>
                         <button class="btn-primary btn addCommentButton" type="submit">Add Comment</button>
