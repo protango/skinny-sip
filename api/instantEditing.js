@@ -66,7 +66,7 @@ function instantEditingApi(router) {
         let userName = userManager.getUsername(req);
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
-        let r = await sql.query`
+        let recipeUpdate = await sql.query`
             DECLARE @userId INT
 
             SELECT @userId = id
@@ -81,32 +81,44 @@ function instantEditingApi(router) {
             FROM dbo.recipeIngredients
             WHERE recipesId = ${Number(input.id)}`;
 
-        for(let i = 0; i < input.recipe.length; i++){
-            if(input.recipe[i].ingredient != "" && input.recipe[i].amount != ""){
-            let r = await sql.query`
+            let ingredientUpdate = new sql.PreparedStatement();
+            ingredientUpdate.input('recipeId', sql.Int)
+            ingredientUpdate.input('ingredientName', sql.VarChar)
+            ingredientUpdate.input('unitSymbol', sql.VarChar)
+            ingredientUpdate.input('ammount', sql.Float)
+
+            await ingredientUpdate.prepare(`
                 DECLARE @ingredientId INT = 0
                 DECLARE @recipeId INT = 0
 
                 SELECT @ingredientId = id
                 FROM dbo.ingredients
-                WHERE name = ${input.recipe[i].ingredient}
+                WHERE name = @ingredientName
 
                 IF @ingredientId = 0
                 BEGIN
-	                DECLARE @unitId int = 0
+                    DECLARE @unitId int = 0
 
-            	    SELECT @unitId = id
-	                FROM dbo.units
-	                WHERE symbol = ${input.recipe[i].unit}
+                    SELECT @unitId = id
+                    FROM dbo.units
+                    WHERE symbol = @unitSymbol
 
-	                INSERT INTO dbo.ingredients(name, unitId) VALUES
-	                (${input.recipe[i].ingredient}, @unitId)
+                    INSERT INTO dbo.ingredients(name, unitId) VALUES
+                    (@ingredientName, @unitId)
 
                     SELECT @ingredientId = SCOPE_IDENTITY()
                 END
 
                 INSERT INTO dbo.recipeIngredients(recipesId, ingredientsId, amount) VALUES
-                (${Number(input.id)},@ingredientId,${Number(input.recipe[i].amount)})`;
+                (@recipeId,@ingredientId,@ammount)`);
+
+        for(let i = 0; i < input.recipe.length; i++){
+            if(input.recipe[i].ingredient != "" && input.recipe[i].amount != ""){
+            let ingredientUpdate = await ps.execute(
+                {recipeId: input.id},
+                {ingredientName: input.recipe[i].ingredient},
+                {unitSymbol: input.recipe[i].unit},
+                {ammount: input.recipe[i].amount});
             }
         }
 
