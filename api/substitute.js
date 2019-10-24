@@ -31,6 +31,7 @@ function substituteApi(router) {
         try {
             await ingredientMap.save(body.ingredient, body.substitute);
         } catch(e) {
+            console.log(e);
             res.redirect(302, '/Error?error='+e.message);
             return;
         }

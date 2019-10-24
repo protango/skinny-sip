@@ -50,7 +50,7 @@ module.exports = {
             throw new Error("Invalid replacement value");
 
         // get replacement nutrition
-        let nutrition = cachedNutritionix([{
+        let nutrition = await cachedNutritionix([{
             amount: 100,
             unit: unitResult.recordset[0].symbol,
             ingredient: substitute,
@@ -67,7 +67,7 @@ module.exports = {
             SELECT TOP(1) id, @nutritionId, @amount
             FROM ingredients where [name] = @ingName AND
             EXISTS (SELECT * FROM nutritionRef WHERE id = @nutritionId)`);
-        for (let nut in nutrition.foods[i].full_nutrients) {
+        for (let nut of nutrition.foods[0].full_nutrients) {
             await ps.execute({
                 ingName: ingredient,
                 nutritionId: nut.attr_id,
@@ -79,7 +79,7 @@ module.exports = {
         updIngPs.input('srvWeight', sql.Int);
         updIngPs.input('ingName', sql.VarChar);
         await updIngPs.prepare(`UPDATE ingredients SET servingWeight=@srvWeight WHERE [name]=@ingName`);
-        updIngPs.execute({srvWeight: nutrition.foods[0].serving_weight_grams, ingName: ingredient});
+        await updIngPs.execute({srvWeight: nutrition.foods[0].serving_weight_grams, ingName: ingredient});
         await updIngPs.unprepare();
     },
     /**
