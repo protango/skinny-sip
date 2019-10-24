@@ -136,7 +136,29 @@ function instantEditingApi(router) {
         if (isNaN(id)) throw new Error("Invalid ID");
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
-        // logic here
+        let recipeUpdate = await sql.query`
+            DECLARE @valid INT = 0
+
+            SELECT @valid = COUNT(*)
+            FROM dbo.recipes r
+            INNER JOIN dbo.users u ON r.userId = u.id
+            WHERE u.username = ${userName} 
+            AND r.id = ${id} 
+        
+            IF @valid = 1
+            BEGIN
+                DELETE
+                FROM dbo.recipeComments
+                WHERE recipesId = ${id} 
+        
+                DELETE
+                FROM dbo.recipeIngredients
+                WHERE recipesId = ${id} 
+        
+                DELETE
+                FROM dbo.recipes
+                WHERE id = ${id} 
+            END`;
 
         // send whether delete was successful or not
         res.setHeader('Content-Type', 'application/json');
