@@ -88,7 +88,7 @@ function instantEditingApi(router) {
     router.post('/api/createRecipe', async (req, res) => {
         /** @type {{id:number, name:string, category: string, recipe: nutrition.recipeLine[]}} */
         let input = req.body;
-        let userName = userManager.getUsername();
+        let userName = userManager.getUsername(req);
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
         let drink = input.drinks
