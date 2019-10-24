@@ -66,11 +66,6 @@ function instantEditingApi(router) {
         let userName = userManager.getUsername(req);
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
-        let drink = input.drinks
-        let ingredients = input.ingredients;
-        let amounts = input.amounts;
-        let units = input.units;
-
         let r = await sql.query`
             DECLARE @userId INT
 
@@ -79,22 +74,22 @@ function instantEditingApi(router) {
             WHERE username = @userName
         
             UPDATE dbo.recipes(name,userId,category,instructions,imageURL) VALUES
-            SET name = ${drink.name}, editedUserId = @userId, category = ${drink.category}, instructions = ${drink.instructions}
-            WHERE id = ${Number(drink.id)}
+            SET name = ${input.name}, editedUserId = @userId, category = ${input.category}, instructions = ${input.method}
+            WHERE id = ${Number(input.id)}
             
             DELETE 
             FROM dbo.recipeIngredients
-            WHERE recipesId = ${Number(drink.id)}`;
+            WHERE recipesId = ${Number(input.id)}`;
 
-        for(let i = 0; i < ingredients.length; i++){
-            if(ingredients[i] != "" && amounts[i] != ""){
+        for(let i = 0; i < input.recipe.length; i++){
+            if(input.recipe[i].ingredient != "" && input.recipe[i].amount != ""){
             let r = await sql.query`
                 DECLARE @ingredientId INT = 0
                 DECLARE @recipeId INT = 0
 
                 SELECT @ingredientId = id
                 FROM dbo.ingredients
-                WHERE name = ${ingredients[i]}
+                WHERE name = ${input.recipe[i].ingredient}
 
                 IF @ingredientId = 0
                 BEGIN
@@ -102,16 +97,16 @@ function instantEditingApi(router) {
 
             	    SELECT @unitId = id
 	                FROM dbo.units
-	                WHERE symbol = ${units[i]}
+	                WHERE symbol = ${input.recipe[i].unit}
 
 	                INSERT INTO dbo.ingredients(name, unitId) VALUES
-	                (${ingredients[i]}, @unitId)
+	                (${input.recipe[i].ingredient}, @unitId)
 
                     SELECT @ingredientId = SCOPE_IDENTITY()
                 END
 
                 INSERT INTO dbo.recipeIngredients(recipesId, ingredientsId, amount) VALUES
-                (${Number(drink.id)},@ingredientId,${Number(amounts[i])})`;
+                (${Number(input.id)},@ingredientId,${Number(input.recipe[i].amount)})`;
             }
         }
 
