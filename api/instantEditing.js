@@ -1,8 +1,9 @@
+const fs = require('fs');
 const express = require('express');
 const sql = require('mssql');
 const nutrition = require("./internal/nutrition");
 const userManager = require("./internal/userManager");
-
+const genericImgURL = __dirname + '/../img/genericCocktail.png';
 
 /**
  * Binds API endpoints to the router related to editing recipes
@@ -35,13 +36,84 @@ function instantEditingApi(router) {
         /** @type {liveNutritionResult} */
         let result = {};
     });
+    router.post('/api/createRecipe', async (req, res) => {
+        /** @type {{id:number, name:string, category: string, recipe: nutrition.recipeLine[]}} */
+        let input = req.body;
+        let userName = userManager.getUsername();
+        if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
+
+        let drink = input.drinks
+        let ingredients = input.ingredients;
+        let volumes = input.volume;
+        let units = input.unit;
+        
+        for(let i = 0; i < ingredients.length; i++){
+
+        }
+        // logic here
+
+        // send whether save was successful or not
+        res.setHeader('Content-Type', 'application/json');
+        if (1==1) {
+            res.send({success: true});
+        } else {
+            res.send({success: false, reason: "Some error reason"});
+        }
+    });
     router.post('/api/saveRecipe', async (req, res) => {
         /** @type {{id:number, name:string, category: string, method : string, recipe: nutrition.recipeLine[]}} */
         let input = req.body;
         let userName = userManager.getUsername(req);
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
-        // logic here
+        let drink = input.drinks
+        let ingredients = input.ingredients;
+        let amounts = input.amounts;
+        let units = input.units;
+
+        let r = await sql.query`
+            DECLARE @userId INT
+
+            SELECT @userId = id
+            FROM dbo.users
+            WHERE username = @userName
+        
+            UPDATE dbo.recipes(name,userId,category,instructions,imageURL) VALUES
+            SET name = ${drink.name}, editedUserId = @userId, category = ${drink.category}, instructions = ${drink.instructions}
+            WHERE id = ${Number(drink.id)}
+            
+            DELETE 
+            FROM dbo.recipeIngredients
+            WHERE recipesId = ${Number(drink.id)}`;
+
+        for(let i = 0; i < ingredients.length; i++){
+            if(ingredients[i] != "" && amounts[i] != ""){
+            let r = await sql.query`
+                DECLARE @ingredientId INT = 0
+                DECLARE @recipeId INT = 0
+
+                SELECT @ingredientId = id
+                FROM dbo.ingredients
+                WHERE name = ${ingredients[i]}
+
+                IF @ingredientId = 0
+                BEGIN
+	                DECLARE @unitId int = 0
+
+            	    SELECT @unitId = id
+	                FROM dbo.units
+	                WHERE symbol = ${units[i]}
+
+	                INSERT INTO dbo.ingredients(name, unitId) VALUES
+	                (${ingredients[i]}, @unitId)
+
+                    SELECT @ingredientId = SCOPE_IDENTITY()
+                END
+
+                INSERT INTO dbo.recipeIngredients(recipesId, ingredientsId, amount) VALUES
+                (${Number(drink.id)},@ingredientId,${Number(amounts[i])})`;
+            }
+        }
 
         // send whether save was successful or not
         res.setHeader('Content-Type', 'application/json');
