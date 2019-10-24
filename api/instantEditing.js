@@ -33,7 +33,15 @@ function instantEditingApi(router) {
         /** @type {nutrition.recipeLine[]} */
         let inputRecipe = req.body;
 
-        let nutritionResult = await nutrition(inputRecipe);
+        let ps = new sql.PreparedStatement();
+        ps.input('ingName', sql.VarChar)
+        await ps.prepare(`SELECT * FROM ingredients WHERE [name]=@ingName`);
+        for (let line of inputRecipe) 
+            if (!(await ps.execute({ingName: x.ingredient})).recordset.length) 
+                line.unknown = true;
+        await ps.unprepare();
+
+        let nutritionResult = await nutrition(inputRecipe.filter(x=>!x.unknown));
         let n = nutritionResult.aggregate;
         let alcObj = n.full_nutrients.find(x=>x.attr_id===221);
         let buildNutRow = function(name, value, rdi, unit, subVal) {
@@ -68,8 +76,13 @@ function instantEditingApi(router) {
                 if (!match) return null;
                 return buildNutRow(match.name, x.value, match.rdi, match.unit);
             }).filter(x => x),
-            individualEnergies: nutritionResult.ingredients.map(x=>x.nf_calories * 4.184)
+            individualEnergies: inputRecipe.map(x=>{
+                let m = nutritionResult.ingredients.find(y=>y.food_name===x.ingredient);
+                if (m == null) return null;
+                return Math.round(m.nf_calories * 4.184);
+            })
         };
+        res.setHeader('Content-Type', 'application/json');
         res.send(result);
     });
     router.post('/api/createRecipe', async (req, res) => {
@@ -117,36 +130,35 @@ function instantEditingApi(router) {
             FROM dbo.recipeIngredients
             WHERE recipesId = ${Number(input.id)}`;
 
-            let ingredientUpdate = new sql.PreparedStatement();
-            ingredientUpdate.input('recipeId', sql.Int)
-            ingredientUpdate.input('ingredientName', sql.VarChar)
-            ingredientUpdate.input('unitSymbol', sql.VarChar)
-            ingredientUpdate.input('ammount', sql.Float)
+        let ingredientUpdate = new sql.PreparedStatement();
+        ingredientUpdate.input('recipeId', sql.Int)
+        ingredientUpdate.input('ingredientName', sql.VarChar)
+        ingredientUpdate.input('unitSymbol', sql.VarChar)
+        ingredientUpdate.input('ammount', sql.Float)
+        await ingredientUpdate.prepare(`
+            DECLARE @ingredientId INT = 0
+            DECLARE @recipeId INT = 0
 
-            await ingredientUpdate.prepare(`
-                DECLARE @ingredientId INT = 0
-                DECLARE @recipeId INT = 0
+            SELECT @ingredientId = id
+            FROM dbo.ingredients
+            WHERE name = @ingredientName
 
-                SELECT @ingredientId = id
-                FROM dbo.ingredients
-                WHERE name = @ingredientName
+            IF @ingredientId = 0
+            BEGIN
+                DECLARE @unitId int = 0
 
-                IF @ingredientId = 0
-                BEGIN
-                    DECLARE @unitId int = 0
+                SELECT @unitId = id
+                FROM dbo.units
+                WHERE symbol = @unitSymbol
 
-                    SELECT @unitId = id
-                    FROM dbo.units
-                    WHERE symbol = @unitSymbol
+                INSERT INTO dbo.ingredients(name, unitId) VALUES
+                (@ingredientName, @unitId)
 
-                    INSERT INTO dbo.ingredients(name, unitId) VALUES
-                    (@ingredientName, @unitId)
+                SELECT @ingredientId = SCOPE_IDENTITY()
+            END
 
-                    SELECT @ingredientId = SCOPE_IDENTITY()
-                END
-
-                INSERT INTO dbo.recipeIngredients(recipesId, ingredientsId, amount) VALUES
-                (@recipeId,@ingredientId,@ammount)`);
+            INSERT INTO dbo.recipeIngredients(recipesId, ingredientsId, amount) VALUES
+            (@recipeId,@ingredientId,@ammount)`);
 
         for(let i = 0; i < input.recipe.length; i++){
             if(input.recipe[i].ingredient != "" && input.recipe[i].amount != ""){
@@ -157,6 +169,7 @@ function instantEditingApi(router) {
                 {ammount: input.recipe[i].amount});
             }
         }
+        await ingredientUpdate.unprepare();
 
         // send whether save was successful or not
         res.setHeader('Content-Type', 'application/json');
