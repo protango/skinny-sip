@@ -24,7 +24,7 @@
                         <button class="btn btn-secondary btnChangeImage" style="position: absolute; top: 5px; left: 5px;">
                             <i class="fas fa-images"></i> Change Image
                         </button>
-                        <img class="mainImg" src="<%=img%>" />
+                        <img class="mainImg" src="<%=img%>" onerror="this.onerror=null; this.src='/img/noImage.png'" />
                     </div>
                     <div class="warningImgs">
                         <% let alcObj = nutrition.aggregate.full_nutrients.find(x=>x.attr_id===221);

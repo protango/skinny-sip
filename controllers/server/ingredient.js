@@ -21,7 +21,7 @@ async function ingredientServerController(query) {
     WHERE i.id = ${id}`;
 
     if (resultIngredient.recordset.length > 0){
-        ingName = resultIngredient.recordset.name;
+        ingName = resultIngredient.recordset[0].name;
     }
 
     let drinks = [];

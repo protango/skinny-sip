@@ -16,7 +16,7 @@
             <% for (var tag of tags) {%><span class='badge badge-secondary ml-1'><%=tag%></span><%}%>
             <div class="d-flex mt-3">
                 <div class="photoCard">
-                    <img  class="mainImg" src="<%=img%>" />
+                    <img  class="mainImg" src="<%=img%>" onerror="this.onerror=null; this.src='/img/noImage.png'" />
 
                     <div class="warningImgs">
                         <% let alcObj = nutrition.aggregate.full_nutrients.find(x=>x.attr_id===221);

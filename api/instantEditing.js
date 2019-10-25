@@ -54,7 +54,7 @@ function instantEditingApi(router) {
                 name: name.toUpperCase(),
                 amountPerServing: Math.round(value*10) / 10,
                 rdiPercent: rdi ? Math.round(value / rdi * 100) : null,
-                amountPer100g: Math.round(value / n.serving_weight_grams * 100 * 10) / 10,
+                amountPer100g: Math.round(value / n.serving_weight_grams * 100 * 10) / 10 || 0,
                 unit: unit,
                 subVal: subVal || false
             }

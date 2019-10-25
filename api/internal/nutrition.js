@@ -4,6 +4,28 @@ const cachedNutritionix = require('./cachedNutritionix');
 const ingredientMap = require('./ingredientMap');
 const microNutrients = JSON.parse(fs.readFileSync(__dirname + '/../../config/micronutrients.json')).microNutrients;
 
+/** @type {cachedNutritionix.nutritionObj} */
+const emptyNut = {
+    food_name: "",
+    serving_qty: 0,
+    serving_unit: 'g',
+    serving_weight_grams:0,
+    nf_calories: 0,
+    nf_total_fat: 0,
+    nf_saturated_fat: 0,
+    nf_cholesterol: 0,
+    nf_sodium: 0,
+    nf_total_carbohydrate: 0,
+    nf_dietary_fiber: 0,
+    nf_sugars: 0,
+    nf_protein: 0,
+    nf_potassium: 0,
+    full_nutrients: [],
+    photo: {
+        thumb: ""
+    }
+}
+
 /**
  * Gets an object containing a drinks aggregate nutrition content, and individual ingredients nutirtion content.
  * @param {recipeLine[]} recipe A recipe object for the drink you are querying
@@ -13,6 +35,11 @@ async function internalNutritionApi(recipe, drinkName) {
     recipe = cloneDeep(recipe);
     /** @type {{microNutrients: [], ingredients: cachedNutritionix.nutritionObj[], aggregate: cachedNutritionix.nutritionObj}} */
     let result = {microNutrients: microNutrients}; // we send micronutrients to the scope for rendering
+    if (!recipe.length) {
+        result.aggregate = {...emptyNut, food_name: drinkName};
+        result.ingredients = [];
+        return result;
+    }
     fixUnknownMeasures(recipe); // fix badly formatted measures in cocktail DB
     fixUnknownIngredients(recipe); // re-map known bad ingredients to their known substitute
 
