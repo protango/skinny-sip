@@ -173,7 +173,21 @@ $(".ingredientEdit").keyup(ingEditKeyupHandler);
 $(".ingredientEdit").blur(ingEditBlurHandler);
 $(".qtyedit").change(qtyEditChangeHandler);
 $(".btnDeleteIngredient").click(btnDeleteIngredientClickHandler);
-
+$(".btnChangeImage").click(()=>{
+    $(".newImageUpload").trigger("click");
+});
+function readURL(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            $('.mainImg').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+$(".newImageUpload").change(function() {
+    readURL(this);
+});
 $(".saveBtn").click(async ()=>{
     /** @type {{id:number, name:string, category: string, method : string, recipe: recipeLine[]}} */
     let drinkData = {
@@ -210,18 +224,23 @@ $(".saveBtn").click(async ()=>{
         return;
     }
     try {
-        await new Promise((resolve, reject)=>$.ajax({
-            type: 'POST',
-            url: '/api/saveRecipe',
-            data: JSON.stringify(drinkData),
-            success: resolve,
-            error: reject,
-            contentType: "application/json",
-            dataType: 'json'
-        }));
-        window.location.href = "/Drink?id="+drinkId;
+        $(".globalLoadOverlay").show();
+        var formData = new FormData();
+        formData.append("drinkData", JSON.stringify(drinkData));
+        if ($(".newImageUpload")[0].files.length)
+            formData.append("newImg", $(".newImageUpload")[0].files[0]);
+        var request = new XMLHttpRequest();
+        request.open("POST", "/api/saveRecipe");
+        request.send(formData);
+        request.onreadystatechange = function() {
+            if (request.readyState === 4) {
+                window.location.href = "/Drink?id="+drinkId;
+            }
+        }
     } catch(e) {
         alert(e.responseJSON.message);
+    } finally {
+        $(".globalLoadOverlay").hide();
     }
 });
 

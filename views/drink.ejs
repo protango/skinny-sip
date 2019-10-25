@@ -16,7 +16,7 @@
             <% for (var tag of tags) {%><span class='badge badge-secondary ml-1'><%=tag%></span><%}%>
             <div class="d-flex mt-3">
                 <div class="photoCard">
-                    <img  class="mainImg" src="https://skinysipblobstorage.blob.core.windows.net/images/Recipe_<%= id %>.jpg" />
+                    <img  class="mainImg" src="<%=img%>" />
 
                     <div class="warningImgs">
                         <% let alcObj = nutrition.aggregate.full_nutrients.find(x=>x.attr_id===221);
@@ -120,7 +120,7 @@
                             %>
                             <% for (let i = 0; i<nutrition.ingredients.length; i++) { let ing = nutrition.ingredients[i]; %>
                                 <tr>
-                                    <td><img class="ingImg" src="https://skinysipblobstorage.blob.core.windows.net/images/Ingredient_<%= og_recipe[i].ingredientID %>_sml.png" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
+                                    <td><img class="ingImg" src="<%=ing.photo.thumb%>" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
                                     <td class="ingredientCell" data-ing="<%=og_recipe[i].ingredient%>"><a href="/Ingredient?id=<%=og_recipe[i].ingredientID%>"><%= toTitleCase(ing.food_name) %></a></td>
                                     <td class="measureCell" data-qty="<%= Math.round(ing.serving_qty*100)/100 %>" data-unit="<%= ing.serving_unit %>">
                                         <span class="mr-3">

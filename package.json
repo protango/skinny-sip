@@ -13,6 +13,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@azure/storage-blob": "^10.5.0",
     "@fortawesome/fontawesome-free": "^5.10.2",
     "bootstrap": "^4.3.1",
     "clone-deep": "^4.0.1",
@@ -20,12 +21,14 @@
     "ejs": "^2.7.1",
     "escape-html": "^1.0.3",
     "express": "^4.17.1",
+    "express-fileupload": "^1.1.6-alpha.6",
     "jquery": "^3.4.1",
     "js-cookie": "^2.2.1",
     "jsonwebtoken": "^8.5.1",
     "mssql": "^5.1.0",
     "popper.js": "^1.15.0",
     "request": "^2.88.0",
-    "request-promise-native": "^1.0.7"
+    "request-promise-native": "^1.0.7",
+    "streamifier": "^0.1.1"
   }
 }

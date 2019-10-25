@@ -4,7 +4,6 @@ const cloneDeep = require('clone-deep');
 const sql = require('mssql');
 
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
-const cache = JSON.parse(fs.readFileSync(__dirname + '/../../config/nutritionixCache.json'));
 
 const maxCacheEntries = 1000;
 

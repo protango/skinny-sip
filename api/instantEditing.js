@@ -3,6 +3,7 @@ const express = require('express');
 const sql = require('mssql');
 const nutrition = require("./internal/nutrition");
 const userManager = require("./internal/userManager");
+const imageManager = require("./internal/imageManager");
 const genericImgURL = __dirname + '/../img/genericCocktail.png';
 const microNutrients = JSON.parse(fs.readFileSync(__dirname + '/../config/micronutrients.json')).microNutrients;
 
@@ -120,7 +121,7 @@ function instantEditingApi(router) {
         const sqlRequest = new sql.Request(transaction);
         try {
             /** @type {{id:number, name:string, category: string, method : string, recipe: nutrition.recipeLine[]}} */
-            let input = req.body;
+            let input = JSON.parse(req.body.drinkData);
             let userName = userManager.getUsername(req);
             if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
             if (isNaN(input.id)) throw new Error("Invalid ID");
@@ -180,6 +181,16 @@ function instantEditingApi(router) {
                 }
             }
             await ingredientUpdate.unprepare();
+
+            // do images if present
+            if (req.files && req.files.newImg) {
+                let imageData = req.files.newImg.data;
+                let ext = req.files.newImg.name.split('.').pop();
+                let datetimeString = new Date().toISOString().replace(/[\.:]/g, "");
+                let newURL = await imageManager.uploadImage(imageData, "Recipe_"+input.id+"."+ext);
+                newURL += "?d=" + datetimeString;
+                await sqlRequest.query`UPDATE recipes SET imageURL=${newURL} WHERE id=${input.id}`;
+            }
 
             // send whether save was successful or not
             await transaction.commit();

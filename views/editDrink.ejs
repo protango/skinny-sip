@@ -9,7 +9,9 @@
     </head>
     <body>
         <% include includes/header.ejs %>
-
+        <div class="globalLoadOverlay" style="display: none">
+            <i class="fas fa-glass-martini-alt"></i>
+        </div>
         <!-- Body -->
         <div class="container" id="resultContainer">
             <h1><input type="text" class="form-control titleEdit" value="<%= name %>" placeholder="Title"></h1>
@@ -17,8 +19,13 @@
             <% for (var tag of tags) {%><span class='badge badge-secondary ml-1'><%=tag%></span><%}%>
             <div class="d-flex mt-3">
                 <div class="photoCard">
-                    <img  class="mainImg" src="https://skinysipblobstorage.blob.core.windows.net/images/Recipe_<%= id %>.jpg" />
-
+                    <div style="position: relative">
+                        <input type="file" class="newImageUpload" style="width: 0; height: 0" accept=".jpg,.jpeg,.png">
+                        <button class="btn btn-secondary btnChangeImage" style="position: absolute; top: 5px; left: 5px;">
+                            <i class="fas fa-images"></i> Change Image
+                        </button>
+                        <img class="mainImg" src="<%=img%>" />
+                    </div>
                     <div class="warningImgs">
                         <% let alcObj = nutrition.aggregate.full_nutrients.find(x=>x.attr_id===221);
                            if (alcObj) {%>

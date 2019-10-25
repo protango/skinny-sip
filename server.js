@@ -9,6 +9,7 @@ const express = require('express');
 const path = require('path')
 const routes = require('./routing');
 const cookieParser = require('cookie-parser');
+const fileUpload = require('express-fileupload');
 
 // Constants
 const PORT = 8080;
@@ -19,6 +20,7 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use(cookieParser());
+app.use(fileUpload());
 
 // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.urlencoded());
