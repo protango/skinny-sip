@@ -186,7 +186,7 @@ function instantEditingApi(router) {
             if (req.files && req.files.newImg) {
                 let imageData = req.files.newImg.data;
                 let ext = req.files.newImg.name.split('.').pop();
-                let datetimeString = new Date().toISOString().replace(/[\.:]/g, "");
+                let datetimeString = new Date().toISOString().replace(/[\.:-TZ]/g, "");
                 let newURL = await imageManager.uploadImage(imageData, "Recipe_"+input.id+"."+ext);
                 newURL += "?d=" + datetimeString;
                 await sqlRequest.query`UPDATE recipes SET imageURL=${newURL} WHERE id=${input.id}`;

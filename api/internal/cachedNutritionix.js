@@ -142,7 +142,7 @@ async function cachedNutritionix(recipe) {
                 }
                 if (imgURL) {
                     let identifier = (await sql.query`SELECT TOP(1) id from ingredients where [name]=${unknownIngredients[i].ingredient}`).recordset[0].id;
-                    let datetimeString = new Date().toISOString().replace(/[\.:]/g, "");
+                    let datetimeString = new Date().toISOString().replace(/[\.:-TZ]/g, "");
                     let ext = imgURL.split('.').pop();
                     if (imgData)
                         imgURL = await imageManager.uploadImage(imgData, "Ingredient_" + identifier + "." + ext);
