@@ -8,14 +8,15 @@ const sql = require('mssql');
  * @param {Object} query An object containing the query string parameters 
  */
 async function drinkServerController(query) {
+    //console.log(query)
     let id = Number(query.id);
     if (isNaN(Number(id))) throw new Error("Invalid Id");
 
-    let result = await sql.query`SELECT r.id, r.name as cocktailName, u.username, r.category, r.instructions, r.imageURL, i.name AS ingredientName, ri.amount, un.symbol, i.id AS ingredientID, u2.username AS editedUser
+    let result = await sql.query`SELECT r.id, ISNULL(r.name,'') as cocktailName, u.username, ISNULL(r.category,'') as category, ISNULL(r.instructions,'') as instructions, ISNULL(r.imageURL,'') as imageURL, ISNULL(i.name,'water') AS ingredientName, ISNULL(ri.amount,300) as amount, ISNULL(un.symbol,'ml') as symbol, ISNULL(i.id,195) AS ingredientID, u2.username AS editedUser
     FROM dbo.recipes r
-    INNER JOIN dbo.recipeIngredients ri on r.id = ri.recipesId
-    INNER JOIN dbo.ingredients i on i.id = ri.ingredientsId
-    INNER JOIN dbo.units un on un.id = i.unitId
+    LEFT JOIN dbo.recipeIngredients ri on r.id = ri.recipesId
+    LEFT JOIN dbo.ingredients i on i.id = ri.ingredientsId
+    LEFT JOIN dbo.units un on un.id = i.unitId
     LEFT JOIN dbo.users u on u.id = r.userId
     LEFT OUTER JOIN dbo.users u2 on u2.id = r.editedUserId
     WHERE r.id = ${id}`;
@@ -39,6 +40,8 @@ async function drinkServerController(query) {
             measure: x.amount + ' ' + x.symbol
         }});
     }
+
+    //console.log(result)
 
     result = await sql.query`Select c.text, u.username, c.[date]
     From dbo.recipes r
