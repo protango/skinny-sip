@@ -4,6 +4,10 @@
         "x-app-key": "468dbab1e189d87d17155c5afa1ad6e3"
     },
     "cocktailDB": 1,
-    "dbConnString": "mssql://cocktailAdmin:t@bles4You@skinnysip-server.database.windows.net/cocktails-database-aus?encrypt=true",
-    "jwtSecret": "n9710418"
+    "dbConnString": "mssql://cocktailAdmin:t@bles4You@skinnysip-server.database.windows.net/cocktails-database-aus_2019-10-25T05-25Z?encrypt=true",
+    "jwtSecret": "n9710418",
+    "azureBlob": {
+        "account": "skinysipblobstorage",
+        "accountKey": "FsrjUXJXMjfFgA4tvMMKcH+QxNGmqTy88B2nHC+1hCgdI1hVH/uLNqQW3GFGaO3kHyFmXWvl1X4GK1UJwocJaA=="
+    }
 }}
