@@ -186,8 +186,19 @@
                             }
                         </script>
                     </form>
-                    <<form class="addDrink" method="POST" action="/api/addDrink">
+                    <form class="addDrink" method="POST" action="/api/addDrink">
                         <button class="btn-primary btn addDrinkButton" type="submit">Create Cocktail</button>
+                    </form>
+                    <form method="POST" class="deleteForm" action="/api/deleteDrink">
+                        <input name="drinkId" id="drinkId" type="hidden" value="<%= id %>">
+                        <button class="btn-primary btn deleteDrinkButton" type="submit">Delete Drink</button>
+                        <script>                            
+                            console.log(elem.html())
+                            if (elem.html().replace("Logout: ", "") != "<%=tag%>") {
+                                $(".deleteDrinkButton").attr("disabled", true);
+                                $(".deleteDrinkButton").hide();
+                            }
+                        </script>
                     </form>
                 </div>                
             </div>

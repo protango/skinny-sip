@@ -102,6 +102,7 @@ router.get('/Login', async (req, res) => {
 
 // api routes
 require("./api/addDrink")(router);
+require("./api/deleteDrink")(router);
 require("./api/search")(router);
 require("./api/random")(router);
 require("./api/substitute")(router);
