@@ -90,30 +90,6 @@ function instantEditingApi(router) {
         res.setHeader('Content-Type', 'application/json');
         res.send(result);
     });
-    router.post('/api/createRecipe', async (req, res) => {
-        /** @type {{id:number, name:string, category: string, recipe: nutrition.recipeLine[]}} */
-        let input = req.body;
-        let userName = userManager.getUsername(req);
-        if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
-
-        let drink = input.drinks
-        let ingredients = input.ingredients;
-        let volumes = input.volume;
-        let units = input.unit;
-        
-        for(let i = 0; i < ingredients.length; i++){
-
-        }
-        // logic here
-
-        // send whether save was successful or not
-        res.setHeader('Content-Type', 'application/json');
-        if (1==1) {
-            res.send({success: true});
-        } else {
-            res.send({success: false, reason: "Some error reason"});
-        }
-    });
     router.post('/api/saveRecipe', async (req, res, next) => {
         res.setHeader('Content-Type', 'application/json');
         const transaction = new sql.Transaction();
@@ -200,40 +176,6 @@ function instantEditingApi(router) {
             console.error(e);
             res.status(500).send({message: e.message});
         }
-    });
-    router.get('/api/deleteRecipe/:id', async (req, res) => {
-        let id = Number(req.params.id);
-        let userName = userManager.getUsername(req);
-        if (isNaN(id)) throw new Error("Invalid ID");
-        if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
-
-        let recipeUpdate = await sql.query`
-            DECLARE @valid INT = 0
-
-            SELECT @valid = COUNT(*)
-            FROM dbo.recipes r
-            INNER JOIN dbo.users u ON r.userId = u.id
-            WHERE u.username = ${userName} 
-            AND r.id = ${id} 
-        
-            IF @valid = 1
-            BEGIN
-                DELETE
-                FROM dbo.recipeComments
-                WHERE recipesId = ${id} 
-        
-                DELETE
-                FROM dbo.recipeIngredients
-                WHERE recipesId = ${id} 
-        
-                DELETE
-                FROM dbo.recipes
-                WHERE id = ${id} 
-            END`;
-
-        // send whether delete was successful or not
-        res.setHeader('Content-Type', 'application/json');
-        res.send({success: true});
     });
 }
 
