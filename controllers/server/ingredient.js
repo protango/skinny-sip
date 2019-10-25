@@ -8,23 +8,33 @@ const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.js
  * @param {Object} query An object containing the query string parameters 
  */
 async function ingredientServerController(query) {
-    if (!query.ingredient) throw new Error("Invalid ingredient");
+    let id = Number(query.id);
+    if (isNaN(Number(id))) throw new Error("Invalid Id");
 
-    let ingName = query.ingredient;
-    let ingSubName = null;
-    let ingDescription = null;
+    let ingName = "";
+    let ingSubName = "";
+    let ingDescription = "";
+
+    let resultIngredient = await sql.query`
+    SELECT name 
+    FROM dbo.ingredients i
+    WHERE i.id = ${id}`;
+
+    if (resultIngredient.recordset.length > 0){
+        ingName = resultIngredient.recordset.name;
+    }
 
     let drinks = [];
 
-    let result = await sql.query`
+    let resultRecipe = await sql.query`
     SELECT r.id, r.name AS cocktailName, r.imageURL 
     FROM dbo.ingredients i
     INNER JOIN dbo.recipeIngredients ri ON i.Id = ri.ingredientsId
     INNER JOIN dbo.recipes r ON r.Id = ri.recipesId
-    WHERE i.name = ${ingName}`;
+    WHERE i.id = ${id}`;
 
-    if (result.recordset.length > 0){
-        drinks = result.recordset.map(x=>{return {
+    if (resultRecipe.recordset.length > 0){
+        drinks = resultRecipe.recordset.map(x=>{return {
             idDrink: x.id,
             strDrink: x.cocktailName,
             strDrinkThumb: x.imageURL
@@ -32,6 +42,7 @@ async function ingredientServerController(query) {
     }
 
     return {
+        id: id,
         ingredient: ingName,
         subName: ingSubName,
         desc: ingDescription,

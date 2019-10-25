@@ -15,7 +15,7 @@
             <i><%=subName%></i>
             <div class="row">
                 <div class="col-3">
-                    <img style="max-width: 255px" src="https://www.thecocktaildb.com/images/ingredients/<%=ingredient%>-Medium.png" class="d-block mx-auto" onerror="this.onerror=null; this.src='/img/noImage.png'" />
+                    <img style="max-width: 255px" src="https://skinysipblobstorage.blob.core.windows.net/images/Ingredient_<%= id %>_med.png" class="d-block mx-auto" onerror="this.onerror=null; this.src='/img/noImage.png'" />
                 </div>
                 <div class="col-9">
                     <p><%=desc%></p>
@@ -27,7 +27,7 @@
             <%}%>
             <% for(let c of drinks) {%>
                 <a id="resultTemplate" class="result" href="/Drink?id=<%=c.idDrink%>">
-                    <img src="<%=c.strDrinkThumb%>" />
+                    <img src="https://skinysipblobstorage.blob.core.windows.net/images/Recipe_<%= c.idDrink %>.jpg" />
                     <div>
                         <h4><%=c.strDrink%></h4>
                         <p><i><%=c.strDrink%></i></p>
