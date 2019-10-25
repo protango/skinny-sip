@@ -10,6 +10,7 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item <% if (locals.active==="Search") {%>active<%}%>"><a class="nav-link" href="/">Search</a></li>
                 <li class="nav-item"><a class="nav-link" href="/Random">Random</a></li>
+                <li class="nav-item <% if (locals.active==="Add") {%>active<%}%>"><a class="nav-link" href="/Add">Create Cocktail</a></li>
                 <li class="nav-item <% if (locals.active==="About") {%>active<%}%>"><a class="nav-link" href="/About">About</a></li>
                 <li class="nav-item <% if (locals.active==="Login") {%>active<%}%>"><a class="nav-link" href="/Login">Login</a></li>
             </ul>
@@ -29,5 +30,8 @@
                 });
             }
         } catch {}
+    } else {
+        let addLink = $("li.nav-item a[href='/Add']");
+        addLink.hide();
     }
 </script>

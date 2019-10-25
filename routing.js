@@ -43,6 +43,35 @@ router.get('/Drink', async (req, res) => {
   }
 });
 
+// add route
+router.get('/Add', async (req, res) => {
+  let username = userManager.refreshAuth(req, res);
+  try {
+    if (!username) throw new Error("Please log in to access this page");
+    let result = await sql.query`DECLARE @userId INT = 0
+
+    SELECT @userId = id
+    FROM dbo.users
+    WHERE username = ${username}
+
+    INSERT INTO dbo.recipes(name, userId, category, instructions) VALUES
+    ('',@userId,'','')
+
+    Select SCOPE_IDENTITY() as drinkId`;
+
+    if (result.recordset.length > 0){
+      ingredientsResult = result.recordset.map(x=>{return {
+      drinkId: x.drinkId
+      }})[0];
+    };
+
+    res.redirect(302, '/Edit?id='+ingredientsResult.drinkId);
+  } catch(e) {
+    console.log(e);
+    res.redirect('/Error?error='+e.message);
+  }
+});
+
 // edit route
 router.get('/Edit', async (req, res) => {
   let username = userManager.refreshAuth(req, res);
@@ -76,7 +105,7 @@ router.get('/Substitute', (req, res) => {
 router.get('/Random', async (req, res) => {
   userManager.refreshAuth(req, res);
   try {
-    let result = await sql.query`SELECT TOP (1) r.id FROM dbo.recipes r ORDER BY newid()`;
+    let result = await sql.query`SELECT TOP (1) r.id FROM dbo.recipes r WHERE r.name != '' ORDER BY newid()`;
     res.redirect(302, '/Drink?id='+result.recordset[0].id);
   } catch (e) {
     console.log(e);
