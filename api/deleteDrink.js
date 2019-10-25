@@ -12,6 +12,10 @@ function deleteDrinkApi(router) {
         if (isNaN(id)) throw new Error("Invalid ID");
         if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
 
+        let rs = (await sql.query`SELECT TOP(1) u.[username] FROM recipes r INNER JOIN [users] u on r.userid = u.id WHERE r.id = ${id}`).recordset;
+        let originalAuthor = rs.length ? rs[0].username : null;
+        if (originalAuthor !== userName) throw new Error("Unauthorised, only the original author can delete their cocktail recipe");
+
         let recipeDelete = await sql.query`
             DECLARE @valid INT = 0
 

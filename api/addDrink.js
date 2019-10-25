@@ -6,7 +6,7 @@ const userManager = require("./internal/userManager");
  * @param {express.Router} router The router object to attach the API to
  */
 function addDrinkApi(router) {
-    router.get('/api/addDrink', async (req, res) => {      
+    router.get('/api/addDrink', async (req, res) => {
         let username = userManager.getUsername(req);
         if (!username) throw new Error("Unauthorised, you must be logged in to do this");
 
@@ -17,7 +17,7 @@ function addDrinkApi(router) {
         WHERE username = ${username}
 
         INSERT INTO dbo.recipes(name, userId, category, instructions,imageURL) VALUES
-        (${username}+'''s cocktail',@userId,'','','https://skinysipblobstorage.blob.core.windows.net/images/Recipe_0.jpg')
+        (${username}+'''s cocktail',@userId,'','','/img/genericCocktail.png')
 
         Select SCOPE_IDENTITY() as drinkId`;
 

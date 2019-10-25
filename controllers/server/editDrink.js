@@ -10,10 +10,6 @@ const sql = require('mssql');
 async function editDrinkServerController(query) {
     // Get normal nutrition object from drinksController
     let drinkObj = await require("./drink")(query);
-
-
-
-
     return drinkObj;
 }
 

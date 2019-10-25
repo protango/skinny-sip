@@ -158,7 +158,16 @@
                             <i class="fas fa-plus"></i> Add Ingredient
                         </button>
                     </div>
-
+                    <form method="POST" class="deleteForm" action="/api/deleteDrink">
+                        <input name="drinkId" id="drinkId" type="hidden" value="<%= id %>">
+                        <button class="btn-danger btn deleteDrinkButton" type="submit">Delete Drink</button>
+                    </form>
+                    <script>     
+                        let elem = $("li.nav-item a[href='/Login']");            
+                        if (elem.html().replace("Logout: ", "") != "<%=tags[0]%>") {
+                            $(".deleteDrinkButton").hide();
+                        }
+                    </script>
                     <h3>Method</h3>
                     <textarea class="form-control methodEdit"><%= method %></textarea>
                     <div class="mt-2">  

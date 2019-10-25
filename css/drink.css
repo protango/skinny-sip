@@ -6,6 +6,7 @@ img.mainImg {
     border-radius: 5px;
     display: block;
     margin: 5px auto;
+    object-fit: contain;
 }
 p.desc {
     margin-left: 320px;

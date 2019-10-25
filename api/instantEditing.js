@@ -46,7 +46,14 @@ function instantEditingApi(router) {
                 line.unknown = true;
         await ps.unprepare();
 
-        let nutritionResult = await nutrition(inputRecipe.filter(x=>!x.unknown));
+        let nutritionResult;
+        try {
+            nutritionResult = await nutrition(inputRecipe.filter(x=>!x.unknown));
+        } catch {
+            res.status(500);
+            res.send("Nutrition Problem");
+            return;
+        }
         let n = nutritionResult.aggregate;
         let alcObj = n.full_nutrients.find(x=>x.attr_id===221);
         let buildNutRow = function(name, value, rdi, unit, subVal) {

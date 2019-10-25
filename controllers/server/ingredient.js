@@ -12,22 +12,24 @@ async function ingredientServerController(query) {
     if (isNaN(Number(id))) throw new Error("Invalid Id");
 
     let ingName = "";
+    let ingImageURL = "";
     let ingSubName = "";
     let ingDescription = "";
 
     let resultIngredient = await sql.query`
-    SELECT name 
+    SELECT name, imageURL
     FROM dbo.ingredients i
     WHERE i.id = ${id}`;
 
     if (resultIngredient.recordset.length > 0){
         ingName = resultIngredient.recordset[0].name;
+        ingImageURL = resultIngredient.recordset[0].imageURL;
     }
 
     let drinks = [];
 
     let resultRecipe = await sql.query`
-    SELECT r.id, r.name AS cocktailName, r.imageURL 
+    SELECT r.id, r.name AS cocktailName, r.imageURL, r.category
     FROM dbo.ingredients i
     INNER JOIN dbo.recipeIngredients ri ON i.Id = ri.ingredientsId
     INNER JOIN dbo.recipes r ON r.Id = ri.recipesId
@@ -37,7 +39,8 @@ async function ingredientServerController(query) {
         drinks = resultRecipe.recordset.map(x=>{return {
             idDrink: x.id,
             strDrink: x.cocktailName,
-            strDrinkThumb: x.imageURL
+            strDrinkThumb: x.imageURL,
+            category: x.category
         }});
     }
 
@@ -46,6 +49,7 @@ async function ingredientServerController(query) {
         ingredient: ingName,
         subName: ingSubName,
         desc: ingDescription,
+        img: ingImageURL,
         drinks: drinks
     };
 }

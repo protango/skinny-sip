@@ -140,11 +140,10 @@
                             <% } %>
                             </tbody>
                         </table>
-                        <div id="editButtons" class="text-right">
-                            <input type="hidden" name="id" value="<%= id %>" />
-                            <a class="btn btn-secondary" href="/Drink?id=<%= id %>">Cancel Changes</a>
-                            <input type="submit" class="btn btn-primary" value="Update Nutrition" />
-                        </div>
+                    </form>
+                    <form method="POST" class="deleteForm" action="/api/deleteDrink">
+                        <input name="drinkId" id="drinkId" type="hidden" value="<%= id %>">
+                        <button class="btn-danger btn deleteDrinkButton" type="submit">Delete Drink</button>
                     </form>
                     <h3>Method</h3>
                     <p><%= method %></p>
@@ -176,26 +175,19 @@
                         <input name="drinkId" id="drinkId" type="hidden" value="<%= id %>">
                         <textarea class="addCommentBox form-control" type="text" name="comment"></textarea>
                         <button class="btn-primary btn addCommentButton" type="submit">Add Comment</button>
-                        <script>
-                            let elem = $("li.nav-item a[href='/Login']");
-                            if (elem.html() === "Login") {
-                                $(".addCommentButton").attr("disabled", true);
-                                $(".addCommentButton").html("Log in to comment");
-                                $(".editBtn").addClass("disabled").attr("title", "Log in to edit this recipe")
-                                .parent().removeAttr("href").click(()=>alert("Log in to edit this recipe"));
-                            }
-                        </script>
                     </form>
-                    <form method="POST" class="deleteForm" action="/api/deleteDrink">
-                        <input name="drinkId" id="drinkId" type="hidden" value="<%= id %>">
-                        <button class="btn-primary btn deleteDrinkButton" type="submit">Delete Drink</button>
-                        <script>                       
-                            if (elem.html().replace("Logout: ", "") != "<%=tag%>") {
-                                $(".deleteDrinkButton").attr("disabled", true);
-                                $(".deleteDrinkButton").hide();
-                            }
-                        </script>
-                    </form>
+                    <script>     
+                        let elem = $("li.nav-item a[href='/Login']");
+                        if (elem.html() === "Login") {
+                            $(".addCommentButton").attr("disabled", true);
+                            $(".addCommentButton").html("Log in to comment");
+                            $(".editBtn").addClass("disabled").attr("title", "Log in to edit this recipe")
+                            .parent().removeAttr("href").click(()=>alert("Log in to edit this recipe"));
+                        }                  
+                        if (elem.html().replace("Logout: ", "") != "<%=tags[0]%>") {
+                            $(".deleteDrinkButton").hide();
+                        }
+                    </script>
                 </div>                
             </div>
             <div class="row mt-5"></div>
