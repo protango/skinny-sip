@@ -14,6 +14,8 @@ p.desc {
 .ingImg {
     height: 128px;
     border-radius: 3px;
+    width: 128px;
+    object-fit: contain;
 }
 
 .ingredients th:first-child,

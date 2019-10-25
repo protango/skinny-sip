@@ -12,6 +12,8 @@ const {
   SharedKeyCredential
 } = azure;
 
+const fetch = require('node-fetch');
+
 const sharedKeyCredential = new SharedKeyCredential(apiKeys.azureBlob.account, apiKeys.azureBlob.accountKey);
 const pipeline = StorageURL.newPipeline(sharedKeyCredential);
 const serviceURL = new ServiceURL(
@@ -43,22 +45,15 @@ module.exports = {
    * @returns {string} A new URL pointing to the image in blob storage
    */
   uploadImageFromURL: async function(publicURL, name) {
-    
+    let d = await fetch(publicURL);
+    let buf = await d.buffer();
+    return (await uploadImage(buf, name));
   },
   /**
    * Uploads an image into azure blob storage with the specified name
    * @param {Buffer} imageData 
    * @param {string} name 
-   * @returns {string} A new URL pointing to the image in blob storage
-   */
-  uploadImage: async function(imageData, name) {
-    return (await uploadImage(imageData, name));
-  },
-  /**
-   * Uploads an image into azure blob storage with the specified name
-   * @param {Buffer} imageData 
-   * @param {string} name 
-   * @returns {string} A new URL pointing to the image in blob storage
+   * @returns {Promise<string>} A new URL pointing to the image in blob storage
    */
   uploadImage: async function(imageData, name) {
     return (await uploadImage(imageData, name));

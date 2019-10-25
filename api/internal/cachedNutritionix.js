@@ -2,6 +2,8 @@ const fs = require('fs');
 const request = require('request-promise-native');
 const cloneDeep = require('clone-deep');
 const sql = require('mssql');
+const imageManager = require('./imageManager');
+const fetch = require('node-fetch');
 
 const apiKeys = JSON.parse(fs.readFileSync(__dirname + '/../../config/apiKeys.json')).apiKeys;
 
@@ -123,8 +125,34 @@ async function cachedNutritionix(recipe) {
 
             for (let i = 0; i < response.foods.length; i++) {
                 // add image to DB
+                // try CDB for image
+                let imgURL = null, imgData = null;
+                let ingNameEncoded = encodeURIComponent(unknownIngredients[i].ingredient);
+                let cdbURL = "https://www.thecocktaildb.com/images/ingredients/"+ingNameEncoded+"-Medium.png";
+                try {
+                    let cdbResponse = await fetch(cdbURL);
+                    if (cdbResponse && cdbResponse.ok) {
+                        imgURL = cdbURL;
+                        imgData = await cdbResponse.buffer();
+                    }
+                } catch {}
+                // try nutritionix for image
+                if (!imgURL) {
+                    imgURL = response.foods[i].photo.thumb.endsWith("nix-apple-grey.png") ? null : response.foods[i].photo.thumb;
+                }
+                if (imgURL) {
+                    let identifier = (await sql.query`SELECT TOP(1) id from ingredients where [name]=${unknownIngredients[i].ingredient}`).recordset[0].id;
+                    let datetimeString = new Date().toISOString().replace(/[\.:]/g, "");
+                    let ext = imgURL.split('.').pop();
+                    if (imgData)
+                        imgURL = await imageManager.uploadImage(imgData, "Ingredient_" + identifier + "." + ext);
+                     else 
+                        imgURL = await imageManager.uploadImageFromURL(imgURL, "Ingredient_" + identifier + "." + ext);
+                    imgURL += "?d="+datetimeString;
+                    response.foods[i].photo.thumb = imgURL;
+                }
                 await updIngPs.execute({
-                    url: response.foods[i].photo.thumb.endsWith("nix-apple-grey.png") ? null : response.foods[i].photo.thumb, 
+                    url: imgURL, 
                     ingName: unknownIngredients[i].ingredient,
                     srvWeight: response.foods[i].serving_weight_grams
                 });
@@ -144,8 +172,6 @@ async function cachedNutritionix(recipe) {
             await updIngPs.unprepare();
         }
     }
-
-    if (unknownIngredients.length === 0) console.log("100% Cached Request!");
 
     // OK so by this point everything should be set up
     // scale nutrition values
