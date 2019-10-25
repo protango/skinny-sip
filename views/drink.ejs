@@ -181,6 +181,8 @@
                             if (elem.html() === "Login") {
                                 $(".addCommentButton").attr("disabled", true);
                                 $(".addCommentButton").html("Log in to comment");
+                                $(".editBtn").addClass("disabled").attr("title", "Log in to edit this recipe")
+                                .parent().removeAttr("href").click(()=>alert("Log in to edit this recipe"));
                             }
                         </script>
                     </form>

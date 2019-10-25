@@ -99,7 +99,7 @@
                 <div class="recipeCard">
                     <h3>
                         Ingredients
-                        <i class="fas fa-history cancelBtn ml-3" title="Cancel changes"></i>
+                        <a href="/Drink?id=<%=id%>"><i class="fas fa-history cancelBtn ml-3" title="Cancel changes"></i></a>
                         <i class="fas fa-save ml-3 saveBtn" title="Save this recipe"></i>
                     </h3>
                     <table class="table ingredients">
@@ -127,20 +127,25 @@
                             <tr class="ingredientRow">
                                 <td><img class="ingImg" src="<%= ing.photo.thumb %>" onerror="this.onerror=null; this.src='/img/noImage.png'" /></td>
                                 <td class="ingredientCell">
-                                    <input type="text" class="form-control ingredientEdit" value="<%= toTitleCase(ing.food_name) %>">
+                                    <div class="dropdown">
+                                        <input type="text" class="form-control ingredientEdit" value="<%= toTitleCase(ing.food_name) %>">
+                                    </div>
                                 </td>
                                 <td class="measureCell" data-unit="<%= ing.serving_unit %>">
                                     <input type="number" class="form-control qtyEdit" value="<%= Math.round(ing.serving_qty*100)/100 %>" min="0.1" step="0.1" max="10000">
-                                    <span>
+                                    <span class="measureUnit">
                                         <%= ing.serving_unit %>
                                     </span>
                                 </td>
-                                <td><%= ing.nf_energy %> kJ</td>
+                                <td class="ingEnergyCell"><%= ing.nf_energy %> kJ</td>
                                 <td><i class="fas fa-times btnDeleteIngredient"></i></td>
                             </tr>
                         <% } %>
                         </tbody>
                     </table>
+                    <div class="badWarning" style="display: none">                    
+                        <i class="fas fa-exclamation-triangle" style="color: orange"></i> Ingredients with this symbol are not included in nutrition calculation
+                    </div>
                     <div class="mb-5 text-right">                    
                         <button class="btn btn-primary addIngredient" />
                             <i class="fas fa-plus"></i> Add Ingredient
@@ -148,11 +153,13 @@
                     </div>
 
                     <h3>Method</h3>
-                    <textarea class="form-control"><%= method %></textarea>
+                    <textarea class="form-control methodEdit"><%= method %></textarea>
                     <div class="mt-2">  
-                        <button class="btn btn-secondary cancelBtn" />
-                            <i class="fas fa-history"></i> Cancel all changes
-                        </button>                  
+                        <a href="/Drink?id=<%=id%>" style="text-decoration: none;">
+                            <button class="btn btn-secondary cancelBtn" />
+                                <i class="fas fa-history"></i> Cancel all changes
+                            </button>        
+                        </a>          
                         <button class="btn btn-primary saveBtn" />
                             <i class="fas fa-save"></i> Save Recipe
                         </button>
@@ -184,7 +191,6 @@
                 </div>
             </div>
         </footer>
-        <script>var locals = <%-JSON.stringify(locals)%>;</script>
         <script src="/controllers/editDrink.js"></script>
     </body>
 </html>

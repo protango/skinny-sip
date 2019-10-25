@@ -45,12 +45,13 @@ router.get('/Drink', async (req, res) => {
 
 // edit route
 router.get('/Edit', async (req, res) => {
-  userManager.refreshAuth(req, res);
+  let username = userManager.refreshAuth(req, res);
   try {
+    if (!username) throw new Error("Please log in to access this page");
     res.render("editDrink", await require("./controllers/server/editDrink")(req.query));
   } catch(e) {
     console.log(e);
-    res.redirect(302, '/Error?error='+e.message);
+    res.redirect('/Error?error='+e.message);
   }
 });
 

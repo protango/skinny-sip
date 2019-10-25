@@ -15,19 +15,23 @@ function instantEditingApi(router) {
     router.get('/api/instantIngredient/:text', async (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         let text = req.params.text;
-        if (!text || text.length < 3) return [];
+        if (!text || text.length === 0) {
+            res.send([]);
+            return;
+        }
         let r = await sql.query`
-            SELECT TOP(10) [name], id, u.symbol
+            SELECT TOP(10) ing.[name], ing.id, u.symbol, ing.imageURL
             FROM ingredients ing 
             INNER JOIN units u ON u.id = ing.unitid
-            WHERE ing.[name] LIKE '%${text}%'`;
+            WHERE ing.[name] LIKE ${'%'+text+'%'}`;
         /** @type {instantResult[]} */
         let result = r.recordset.map(x=>{return {
             id: x.id,
             ingredient: x.name,
-            unit: x.symbol
+            unit: x.symbol,
+            imageURL: x.imageURL || "https://www.thecocktaildb.com/images/ingredients/"+x.name+"-Small.png"
         }});
-        return result;
+        res.send(result);
     });
     router.post('/api/liveNutrition', async (req, res) => {
         /** @type {nutrition.recipeLine[]} */
@@ -77,7 +81,7 @@ function instantEditingApi(router) {
                 return buildNutRow(match.name, x.value, match.rdi, match.unit);
             }).filter(x => x),
             individualEnergies: inputRecipe.map(x=>{
-                let m = nutritionResult.ingredients.find(y=>y.food_name===x.ingredient);
+                let m = nutritionResult.ingredients.find(y=>y.food_name.toLowerCase()===x.ingredient.toLowerCase());
                 if (m == null) return null;
                 return Math.round(m.nf_calories * 4.184);
             })
@@ -109,74 +113,81 @@ function instantEditingApi(router) {
             res.send({success: false, reason: "Some error reason"});
         }
     });
-    router.post('/api/saveRecipe', async (req, res) => {
-        /** @type {{id:number, name:string, category: string, method : string, recipe: nutrition.recipeLine[]}} */
-        let input = req.body;
-        let userName = userManager.getUsername(req);
-        if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
-
-        let recipeUpdate = await sql.query`
-            DECLARE @userId INT
-
-            SELECT @userId = id
-            FROM dbo.users
-            WHERE username = @userName
-        
-            UPDATE dbo.recipes(name,userId,category,instructions,imageURL) VALUES
-            SET name = ${input.name}, editedUserId = @userId, category = ${input.category}, instructions = ${input.method}
-            WHERE id = ${Number(input.id)}
-            
-            DELETE 
-            FROM dbo.recipeIngredients
-            WHERE recipesId = ${Number(input.id)}`;
-
-        let ingredientUpdate = new sql.PreparedStatement();
-        ingredientUpdate.input('recipeId', sql.Int)
-        ingredientUpdate.input('ingredientName', sql.VarChar)
-        ingredientUpdate.input('unitSymbol', sql.VarChar)
-        ingredientUpdate.input('ammount', sql.Float)
-        await ingredientUpdate.prepare(`
-            DECLARE @ingredientId INT = 0
-            DECLARE @recipeId INT = 0
-
-            SELECT @ingredientId = id
-            FROM dbo.ingredients
-            WHERE name = @ingredientName
-
-            IF @ingredientId = 0
-            BEGIN
-                DECLARE @unitId int = 0
-
-                SELECT @unitId = id
-                FROM dbo.units
-                WHERE symbol = @unitSymbol
-
-                INSERT INTO dbo.ingredients(name, unitId) VALUES
-                (@ingredientName, @unitId)
-
-                SELECT @ingredientId = SCOPE_IDENTITY()
-            END
-
-            INSERT INTO dbo.recipeIngredients(recipesId, ingredientsId, amount) VALUES
-            (@recipeId,@ingredientId,@ammount)`);
-
-        for(let i = 0; i < input.recipe.length; i++){
-            if(input.recipe[i].ingredient != "" && input.recipe[i].amount != ""){
-            let ingredientUpdate = await ps.execute(
-                {recipeId: input.id},
-                {ingredientName: input.recipe[i].ingredient},
-                {unitSymbol: input.recipe[i].unit},
-                {ammount: input.recipe[i].amount});
-            }
-        }
-        await ingredientUpdate.unprepare();
-
-        // send whether save was successful or not
+    router.post('/api/saveRecipe', async (req, res, next) => {
         res.setHeader('Content-Type', 'application/json');
-        if (1==1) {
+        const transaction = new sql.Transaction();
+        await transaction.begin();
+        const sqlRequest = new sql.Request(transaction);
+        try {
+            /** @type {{id:number, name:string, category: string, method : string, recipe: nutrition.recipeLine[]}} */
+            let input = req.body;
+            let userName = userManager.getUsername(req);
+            if (!userName) throw new Error("Unauthorised, you must be logged in to do this");
+            if (isNaN(input.id)) throw new Error("Invalid ID");
+
+            /**@type {sql.IProcedureResult}*/
+            let recipeUpdateResult= await sqlRequest.query`
+                DECLARE @userId INT
+
+                SELECT @userId = id
+                FROM dbo.users
+                WHERE username = ${userName}
+            
+                UPDATE dbo.recipes 
+                SET [name] = ${input.name}, editedUserId = @userId, category = ${input.category}, instructions = ${input.method}
+                WHERE id = ${Number(input.id)}
+                
+                DELETE 
+                FROM dbo.recipeIngredients
+                WHERE recipesId = ${Number(input.id)}`;
+
+            let ingredientUpdate = new sql.PreparedStatement(transaction);
+            ingredientUpdate.input('recipeId', sql.Int)
+            ingredientUpdate.input('ingredientName', sql.VarChar)
+            ingredientUpdate.input('unitSymbol', sql.VarChar)
+            ingredientUpdate.input('ammount', sql.Float)
+            await ingredientUpdate.prepare(`
+                DECLARE @ingredientId INT = 0
+
+                SELECT @ingredientId = id
+                FROM dbo.ingredients
+                WHERE [name] = @ingredientName
+
+                IF @ingredientId = 0
+                BEGIN
+                    DECLARE @unitId int = 0
+
+                    SELECT @unitId = id
+                    FROM dbo.units
+                    WHERE symbol = @unitSymbol
+
+                    INSERT INTO dbo.ingredients([name], unitId) VALUES
+                    (@ingredientName, @unitId)
+
+                    SELECT @ingredientId = SCOPE_IDENTITY()
+                END
+
+                INSERT INTO dbo.recipeIngredients(recipesId, ingredientsId, amount) VALUES
+                (@recipeId,@ingredientId,@ammount)`);
+
+            for(let i = 0; i < input.recipe.length; i++){
+                if(input.recipe[i].ingredient != "" && input.recipe[i].amount != ""){
+                let ingredientUpdateResponse = await ingredientUpdate.execute(
+                    {recipeId: input.id,
+                    ingredientName: input.recipe[i].ingredient,
+                    unitSymbol: input.recipe[i].unit,
+                    ammount: input.recipe[i].amount});
+                }
+            }
+            await ingredientUpdate.unprepare();
+
+            // send whether save was successful or not
+            await transaction.commit();
             res.send({success: true});
-        } else {
-            res.send({success: false, reason: "Some error reason"});
+        } catch (e) {
+            await transaction.rollback();
+            console.error(e);
+            res.status(500).send({message: e.message});
         }
     });
     router.get('/api/deleteRecipe/:id', async (req, res) => {

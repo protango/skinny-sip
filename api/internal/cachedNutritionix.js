@@ -125,7 +125,7 @@ async function cachedNutritionix(recipe) {
             for (let i = 0; i < response.foods.length; i++) {
                 // add image to DB
                 await updIngPs.execute({
-                    url: response.foods[i].photo.thumb, 
+                    url: response.foods[i].photo.thumb.endsWith("nix-apple-grey.png") ? null : response.foods[i].photo.thumb, 
                     ingName: unknownIngredients[i].ingredient,
                     srvWeight: response.foods[i].serving_weight_grams
                 });
