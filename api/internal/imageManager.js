@@ -60,7 +60,7 @@ module.exports = {
   },
   deleteImage: async function(name) {
     let blobURL = BlobURL.fromContainerURL(containerURL, name);
-    let bbURL = BlockBlobURL.fromBlobURL();
+    let bbURL = BlockBlobURL.fromBlobURL(blobURL);
     return await bbURL.delete();
   }
 }
