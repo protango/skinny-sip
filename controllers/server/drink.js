@@ -39,6 +39,8 @@ async function drinkServerController(query) {
             ingredient: x.ingredientName,
             measure: x.amount + ' ' + x.symbol
         }});
+    } else {
+        throw new Error("Id does not correspond to any recipe");
     }
 
     //console.log(result)
