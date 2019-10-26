@@ -57,5 +57,10 @@ module.exports = {
    */
   uploadImage: async function(imageData, name) {
     return (await uploadImage(imageData, name));
+  },
+  deleteImage: async function(name) {
+    let blobURL = BlobURL.fromContainerURL(containerURL, name);
+    let bbURL = BlockBlobURL.fromBlobURL();
+    return await bbURL.delete();
   }
 }
