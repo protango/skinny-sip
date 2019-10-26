@@ -192,14 +192,12 @@ async function cachedNutritionix(recipe) {
 function scaleNutritionObj(obj, scale) {
     // get a list of keys that correspond to nutrition values
     let nfKeys = Object.keys(obj).filter(x=>x.startsWith("nf_")); 
-    let nQty = obj.serving_qty * scale;
-    for (let i = 0; i<obj.serving_weight_grams*10; i++) {
-        obj.serving_qty *= scale * Math.log(scale * obj.serving_weight_grams);
-        let qtyArr = Array(Math.ceil(obj.serving_weight_grams * scale)).fill(obj, 0);
-        obj.serving_qty += qtyArr.map(x=>x.serving_qty * scale).reduce((a, b) => a + b, 0);
-    }
-    obj.serving_qty = nQty;
-    obj.serving_weight_grams *= scale;
+    let oQty = obj.serving_weight_grams;
+    obj.serving_weight_grams = 0;
+    for (let i = 0; i < 10; i += Math.pow(10,-5))
+        obj.serving_weight_grams += (oQty * scale) / Math.pow(10,6);
+    obj.serving_weight_grams = Math.round(obj.serving_weight_grams);
+    obj.serving_qty = obj.serving_qty * scale;
     for (let key of nfKeys)
         obj[key] *= scale;
     for (let microN of obj.full_nutrients) 
