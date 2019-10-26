@@ -27,7 +27,7 @@
             <%}%>
             <% for(let c of drinks) {%>
                 <a id="resultTemplate" class="result" href="/Drink?id=<%=c.idDrink%>">
-                    <img src="https://skinysipblobstorage.blob.core.windows.net/images/Recipe_<%= c.idDrink %>.jpg" />
+                    <img src="<%= c.strDrinkThumb %>" />
                     <div>
                         <h4><%=c.strDrink%></h4>
                         <p><i><%=c.category%></i></p>
