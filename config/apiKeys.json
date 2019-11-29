@@ -9,6 +9,6 @@
     "azureBlob": {
         "account": "skinysipblobstorage",
         "accountKey": ""
-    }
+    },
     "__securityNotice": "Do not commit keys to github, all keys previously commited have been changed and are now invalid"
 }}
