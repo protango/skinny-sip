@@ -26,7 +26,7 @@
     "js-cookie": "^2.2.1",
     "jsonwebtoken": "^8.5.1",
     "mssql": "^5.1.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^3.1.1",
     "popper.js": "^1.15.0",
     "request-promise-native": "^1.0.7",
     "streamifier": "^0.1.1"
